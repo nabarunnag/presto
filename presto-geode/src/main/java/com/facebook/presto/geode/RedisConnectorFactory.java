@@ -69,7 +69,7 @@ public class RedisConnectorFactory
                     new JsonModule(),
                     new RedisConnectorModule(),
                     binder -> {
-                        binder.bind(RedisConnectorId.class).toInstance(new RedisConnectorId(connectorId));
+                        binder.bind(GeodeConnectorId.class).toInstance(new GeodeConnectorId(connectorId));
                         binder.bind(TypeManager.class).toInstance(context.getTypeManager());
                         binder.bind(NodeManager.class).toInstance(context.getNodeManager());
 

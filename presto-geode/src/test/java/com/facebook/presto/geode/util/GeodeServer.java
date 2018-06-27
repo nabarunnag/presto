@@ -17,6 +17,8 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.net.URISyntaxException;
 
+import org.apache.geode.cache.client.ClientCache;
+import org.apache.geode.cache.client.ClientCacheFactory;
 import org.apache.geode.distributed.ServerLauncher;
 
 public class GeodeServer
@@ -36,6 +38,7 @@ public class GeodeServer
         this.serverLauncher = new ServerLauncher.Builder()
             .setMemberName("server")
             .setServerPort(40404)
+            .set("cache-xml-file","/Users/nnag/Development/prestodb/presto/presto-geode/src/test/java/com/facebook/presto/geode/util/server-cache.xml")
             .set("locators","localhost[10334]")
             .build();
 
@@ -47,6 +50,8 @@ public class GeodeServer
         serverLauncher.start();
 
     }
+
+
 
     @Override
     public void close()

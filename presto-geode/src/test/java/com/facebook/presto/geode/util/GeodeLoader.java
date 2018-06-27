@@ -51,30 +51,39 @@ import static com.facebook.presto.util.DateTimeUtils.parseTimestampWithoutTimeZo
 import static com.google.common.base.Preconditions.checkState;
 import static java.util.Objects.requireNonNull;
 
-public class RedisLoader
+import org.apache.geode.cache.Region;
+import org.apache.geode.cache.client.ClientCache;
+import org.apache.geode.cache.client.ClientCacheFactory;
+
+public class GeodeLoader
         extends AbstractTestingPrestoClient<Void>
 {
     private static final DateTimeFormatter ISO8601_FORMATTER = ISODateTimeFormat.dateTime();
 
-    private final JedisPool jedisPool;
+    private final GeodeServer geodeServer;
     private final String tableName;
     private final String dataFormat;
     private final AtomicLong count = new AtomicLong();
     private final JsonEncoder jsonEncoder;
+    private final ClientCache clientCache;
 
-    public RedisLoader(
+    public GeodeLoader(
             TestingPrestoServer prestoServer,
             Session defaultSession,
-            JedisPool jedisPool,
+            GeodeServer geodeServer,
             String tableName,
-            String dataFormat)
+            String dataFormat,
+            ClientCache clientCache)
     {
         super(prestoServer, defaultSession);
-        this.jedisPool = jedisPool;
+        this.geodeServer = geodeServer;
         this.tableName = tableName;
         this.dataFormat = dataFormat;
         jsonEncoder = new JsonEncoder();
+        this.clientCache = clientCache;
+
     }
+
 
     @Override
     public ResultsSession<Void> getResultSession(Session session)
@@ -105,10 +114,12 @@ public class RedisLoader
             if (data.getData() != null) {
                 checkState(types.get() != null, "Data without types received!");
                 List<Column> columns = statusInfo.getColumns();
+
                 for (List<Object> fields : data.getData()) {
                     String redisKey = tableName + ":" + count.getAndIncrement();
+                    Region region = clientCache.getRegion("region");
 
-                    try (Jedis jedis = jedisPool.getResource()) {
+                     {
                         switch (dataFormat) {
                             case "string":
                                 ImmutableMap.Builder<String, Object> builder = ImmutableMap.builder();
@@ -119,17 +130,17 @@ public class RedisLoader
                                         builder.put(columns.get(i).getName(), value);
                                     }
                                 }
-                                jedis.set(redisKey, jsonEncoder.toString(builder.build()));
+                                region.put(redisKey, jsonEncoder.toString(builder.build()));
                                 break;
-                            case "hash":
-                                // add keys to zset
-                                String redisZset = "keyset:" + tableName;
-                                jedis.zadd(redisZset, count.get(), redisKey);
-                                // add values to Hash
-                                for (int i = 0; i < fields.size(); i++) {
-                                    jedis.hset(redisKey, columns.get(i).getName(), fields.get(i).toString());
-                                }
-                                break;
+//                            case "hash":
+//                                // add keys to zset
+//                                String redisZset = "keyset:" + tableName;
+//                                jedis.zadd(redisZset, count.get(), redisKey);
+//                                // add values to Hash
+//                                for (int i = 0; i < fields.size(); i++) {
+//                                    jedis.hset(redisKey, columns.get(i).getName(), fields.get(i).toString());
+//                                }
+//                                break;
                             default:
                                 throw new AssertionError("unhandled value type: " + dataFormat);
                         }

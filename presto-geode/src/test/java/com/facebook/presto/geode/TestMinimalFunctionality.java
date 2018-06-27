@@ -41,6 +41,10 @@ import static com.facebook.presto.testing.assertions.Assert.assertEquals;
 import static com.facebook.presto.transaction.TransactionBuilder.transaction;
 import static org.testng.Assert.assertTrue;
 
+import org.apache.geode.cache.Region;
+import org.apache.geode.cache.client.ClientCache;
+import org.apache.geode.cache.client.ClientCacheFactory;
+
 @Test(singleThreaded = true)
 public class TestMinimalFunctionality
 {
@@ -52,6 +56,7 @@ public class TestMinimalFunctionality
     private GeodeServer geodeServer;
     private String tableName;
     private StandaloneQueryRunner queryRunner;
+    private ClientCache clientCache;
 
     @BeforeClass
     public void startGeode()
@@ -59,6 +64,9 @@ public class TestMinimalFunctionality
     {
         geodeServer = GeodeServer.createGeodeServerLauncher();
         geodeServer.start();
+        ClientCacheFactory
+            clientCacheFactory = new ClientCacheFactory().set("cache-xml-file","/Users/nnag/Development/prestodb/presto/presto-geode/src/test/java/com/facebook/presto/geode/util/client-cache.xml");
+        clientCache = clientCacheFactory.create();
     }
 
     @AfterClass(alwaysRun = true)
@@ -92,10 +100,12 @@ public class TestMinimalFunctionality
     private void populateData(int count)
     {
         JsonEncoder jsonEncoder = new JsonEncoder();
+        Region region = clientCache.getRegion("region");
         for (long i = 0; i < count; i++) {
             Object value = ImmutableMap.of("id", Long.toString(i), "value", UUID.randomUUID().toString());
-            try (Jedis jedis = geodeServer.getJedisPool().getResource()) {
-                jedis.set(tableName + ":" + i, jsonEncoder.toString(value));
+
+             {
+                region.put(tableName + ":" + i, jsonEncoder.toString(value));
             }
         }
     }

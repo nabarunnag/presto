@@ -67,7 +67,7 @@ public final class RedisQueryRunner
 
             geodeServer.start();
 
-            Map<SchemaTableName, RedisTableDescription> tableDescriptions = createTpchTableDescriptions(queryRunner.getCoordinator().getMetadata(), tables, dataFormat);
+            Map<SchemaTableName, GeodeTableDescription> tableDescriptions = createTpchTableDescriptions(queryRunner.getCoordinator().getMetadata(), tables, dataFormat);
 
             installGeodePlugin(geodeServer, queryRunner, tableDescriptions);
 
@@ -79,7 +79,7 @@ public final class RedisQueryRunner
                 loadTpchTable(geodeServer, prestoClient, table, dataFormat);
             }
             log.info("Loading complete in %s", nanosSince(startTime).toString(SECONDS));
-            geodeServer.destroyJedisPool();
+            geodeServer.close();
             return queryRunner;
         }
         catch (Throwable e) {
@@ -106,12 +106,12 @@ public final class RedisQueryRunner
         return TPCH_SCHEMA + ":" + table.getTableName().toLowerCase(ENGLISH);
     }
 
-    private static Map<SchemaTableName, RedisTableDescription> createTpchTableDescriptions(Metadata metadata, Iterable<TpchTable<?>> tables, String dataFormat)
+    private static Map<SchemaTableName, GeodeTableDescription> createTpchTableDescriptions(Metadata metadata, Iterable<TpchTable<?>> tables, String dataFormat)
             throws Exception
     {
-        JsonCodec<RedisTableDescription> tableDescriptionJsonCodec = new CodecSupplier<>(RedisTableDescription.class, metadata).get();
+        JsonCodec<GeodeTableDescription> tableDescriptionJsonCodec = new CodecSupplier<>(GeodeTableDescription.class, metadata).get();
 
-        ImmutableMap.Builder<SchemaTableName, RedisTableDescription> tableDescriptions = ImmutableMap.builder();
+        ImmutableMap.Builder<SchemaTableName, GeodeTableDescription> tableDescriptions = ImmutableMap.builder();
         for (TpchTable<?> table : tables) {
             String tableName = table.getTableName();
             SchemaTableName tpchTable = new SchemaTableName(TPCH_SCHEMA, tableName);

@@ -13,11 +13,16 @@
  */
 package com.facebook.presto.geode.util;
 
+import static java.lang.String.format;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.AbstractMap;
+import java.util.Map;
+
 import com.facebook.presto.geode.GeodePlugin;
 import com.facebook.presto.geode.GeodeTableDescription;
 import com.facebook.presto.metadata.QualifiedObjectName;
-import com.facebook.presto.geode.RedisPlugin;
-import com.facebook.presto.geode.RedisTableDescription;
 import com.facebook.presto.spi.SchemaTableName;
 import com.facebook.presto.testing.QueryRunner;
 import com.facebook.presto.tests.TestingPrestoClient;
@@ -25,13 +30,6 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.io.ByteStreams;
 import io.airlift.json.JsonCodec;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.AbstractMap;
-import java.util.Map;
-
-import static java.lang.String.format;
 
 public final class RedisTestUtils
 {
@@ -54,8 +52,8 @@ public final class RedisTestUtils
 
     public static void loadTpchTable(GeodeServer geodeServer, TestingPrestoClient prestoClient, String tableName, QualifiedObjectName tpchTableName, String dataFormat)
     {
-        RedisLoader tpchLoader = new RedisLoader(prestoClient.getServer(), prestoClient.getDefaultSession(), geodeServer
-            .getJedisPool(), tableName, dataFormat);
+        GeodeLoader
+            tpchLoader = new GeodeLoader(prestoClient.getServer(), prestoClient.getDefaultSession(), geodeServer, tableName, dataFormat);
         tpchLoader.execute(format("SELECT * from %s", tpchTableName));
     }
 

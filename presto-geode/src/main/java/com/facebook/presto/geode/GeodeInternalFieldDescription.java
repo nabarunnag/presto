@@ -38,39 +38,45 @@ import static java.util.Objects.requireNonNull;
  * forBooleanValue/forLongValue/forBytesValue methods and the resulting FieldValueProvider is then passed into the appropriate row decoder, the fields
  * will be null. Most values are assigned in the {@link GeodeRecordSet}.
  */
-public class RedisInternalFieldDescription
+public class GeodeInternalFieldDescription
 {
     /**
      * <tt>_key</tt> - Represents the key as a text column.
      */
-    public static final RedisInternalFieldDescription KEY_FIELD = new RedisInternalFieldDescription("_key", createUnboundedVarcharType(), "Key text");
+    public static final GeodeInternalFieldDescription
+        KEY_FIELD = new GeodeInternalFieldDescription("_key", createUnboundedVarcharType(), "Key text");
 
     /**
      * <tt>_value</tt> - Represents the value as a text column. Format is UTF-8
      */
-    public static final RedisInternalFieldDescription VALUE_FIELD = new RedisInternalFieldDescription("_value", createUnboundedVarcharType(), "Value text");
+    public static final GeodeInternalFieldDescription
+        VALUE_FIELD = new GeodeInternalFieldDescription("_value", createUnboundedVarcharType(), "Value text");
 
     /**
      * <tt>_value_corrupt</tt> - True if the row converter could not read the value. May be null if the row converter does not set a value (e.g. the dummy row converter does not).
      */
-    public static final RedisInternalFieldDescription VALUE_CORRUPT_FIELD = new RedisInternalFieldDescription("_value_corrupt", BooleanType.BOOLEAN, "Value data is corrupt");
+    public static final GeodeInternalFieldDescription
+        VALUE_CORRUPT_FIELD = new GeodeInternalFieldDescription("_value_corrupt", BooleanType.BOOLEAN, "Value data is corrupt");
 
     /**
      * <tt>_value_length</tt> - length in bytes of the value.
      */
-    public static final RedisInternalFieldDescription VALUE_LENGTH_FIELD = new RedisInternalFieldDescription("_value_length", BigintType.BIGINT, "Total number of value bytes");
+    public static final GeodeInternalFieldDescription
+        VALUE_LENGTH_FIELD = new GeodeInternalFieldDescription("_value_length", BigintType.BIGINT, "Total number of value bytes");
 
     /**
      * <tt>_key_corrupt</tt> - True if the row converter could not read the key. May be null if the row converter does not set a value (e.g. the dummy row converter does not).
      */
-    public static final RedisInternalFieldDescription KEY_CORRUPT_FIELD = new RedisInternalFieldDescription("_key_corrupt", BooleanType.BOOLEAN, "Key data is corrupt");
+    public static final GeodeInternalFieldDescription
+        KEY_CORRUPT_FIELD = new GeodeInternalFieldDescription("_key_corrupt", BooleanType.BOOLEAN, "Key data is corrupt");
 
     /**
      * <tt>_key_length</tt> - length in bytes of the key.
      */
-    public static final RedisInternalFieldDescription KEY_LENGTH_FIELD = new RedisInternalFieldDescription("_key_length", BigintType.BIGINT, "Total number of key bytes");
+    public static final GeodeInternalFieldDescription
+        KEY_LENGTH_FIELD = new GeodeInternalFieldDescription("_key_length", BigintType.BIGINT, "Total number of key bytes");
 
-    public static Set<RedisInternalFieldDescription> getInternalFields()
+    public static Set<GeodeInternalFieldDescription> getInternalFields()
     {
         return ImmutableSet.of(KEY_FIELD, VALUE_FIELD,
                 KEY_LENGTH_FIELD, VALUE_LENGTH_FIELD,
@@ -81,7 +87,7 @@ public class RedisInternalFieldDescription
     private final Type type;
     private final String comment;
 
-    RedisInternalFieldDescription(
+    GeodeInternalFieldDescription(
             String name,
             Type type,
             String comment)
@@ -123,17 +129,17 @@ public class RedisInternalFieldDescription
 
     public FieldValueProvider forBooleanValue(boolean value)
     {
-        return new BooleanRedisFieldValueProvider(value);
+        return new BooleanGeodeFieldValueProvider(value);
     }
 
     public FieldValueProvider forLongValue(long value)
     {
-        return new LongRedisFieldValueProvider(value);
+        return new LongGeodeFieldValueProvider(value);
     }
 
     public FieldValueProvider forByteValue(byte[] value)
     {
-        return new BytesRedisFieldValueProvider(value);
+        return new BytesGeodeFieldValueProvider(value);
     }
 
     @Override
@@ -152,7 +158,7 @@ public class RedisInternalFieldDescription
             return false;
         }
 
-        RedisInternalFieldDescription other = (RedisInternalFieldDescription) obj;
+        GeodeInternalFieldDescription other = (GeodeInternalFieldDescription) obj;
         return Objects.equals(this.name, other.name) &&
                 Objects.equals(this.type, other.type);
     }
@@ -166,12 +172,12 @@ public class RedisInternalFieldDescription
                 .toString();
     }
 
-    public class BooleanRedisFieldValueProvider
+    public class BooleanGeodeFieldValueProvider
             extends FieldValueProvider
     {
         private final boolean value;
 
-        private BooleanRedisFieldValueProvider(boolean value)
+        private BooleanGeodeFieldValueProvider(boolean value)
         {
             this.value = value;
         }
@@ -195,12 +201,12 @@ public class RedisInternalFieldDescription
         }
     }
 
-    public class LongRedisFieldValueProvider
+    public class LongGeodeFieldValueProvider
             extends FieldValueProvider
     {
         private final long value;
 
-        private LongRedisFieldValueProvider(long value)
+        private LongGeodeFieldValueProvider(long value)
         {
             this.value = value;
         }
@@ -224,12 +230,12 @@ public class RedisInternalFieldDescription
         }
     }
 
-    public class BytesRedisFieldValueProvider
+    public class BytesGeodeFieldValueProvider
             extends FieldValueProvider
     {
         private final byte[] value;
 
-        private BytesRedisFieldValueProvider(byte[] value)
+        private BytesGeodeFieldValueProvider(byte[] value)
         {
             this.value = value;
         }

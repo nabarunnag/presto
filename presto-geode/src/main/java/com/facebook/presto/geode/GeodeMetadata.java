@@ -43,40 +43,40 @@ import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import static com.facebook.presto.geode.RedisHandleResolver.convertColumnHandle;
-import static com.facebook.presto.geode.RedisHandleResolver.convertLayout;
-import static com.facebook.presto.geode.RedisHandleResolver.convertTableHandle;
+import static com.facebook.presto.geode.GeodeHandleResolver.convertColumnHandle;
+import static com.facebook.presto.geode.GeodeHandleResolver.convertLayout;
+import static com.facebook.presto.geode.GeodeHandleResolver.convertTableHandle;
 import static java.util.Objects.requireNonNull;
 
 /**
  * Manages the Redis connector specific metadata information. The Connector provides an additional set of columns
- * for each table that are created as hidden columns. See {@link RedisInternalFieldDescription} for a list
+ * for each table that are created as hidden columns. See {@link GeodeInternalFieldDescription} for a list
  * of additional columns.
  */
-public class RedisMetadata
+public class GeodeMetadata
         implements ConnectorMetadata
 {
-    private static final Logger log = Logger.get(RedisMetadata.class);
+    private static final Logger log = Logger.get(GeodeMetadata.class);
 
     private final String connectorId;
     private final boolean hideInternalColumns;
 
-    private final Supplier<Map<SchemaTableName, RedisTableDescription>> redisTableDescriptionSupplier;
-    private final Set<RedisInternalFieldDescription> internalFieldDescriptions;
+    private final Supplier<Map<SchemaTableName, GeodeTableDescription>> redisTableDescriptionSupplier;
+    private final Set<GeodeInternalFieldDescription> internalFieldDescriptions;
 
     @Inject
-    RedisMetadata(
+    GeodeMetadata(
             GeodeConnectorId connectorId,
             GeodeConnectorConfig geodeConnectorConfig,
-            Supplier<Map<SchemaTableName, RedisTableDescription>> redisTableDescriptionSupplier,
-            Set<RedisInternalFieldDescription> internalFieldDescriptions)
+            Supplier<Map<SchemaTableName, GeodeTableDescription>> redisTableDescriptionSupplier,
+            Set<GeodeInternalFieldDescription> internalFieldDescriptions)
     {
         this.connectorId = requireNonNull(connectorId, "connectorId is null").toString();
 
         requireNonNull(geodeConnectorConfig, "redisConfig is null");
-        hideInternalColumns = geodeConnectorConfig.isHideInternalColumns();
+        hideInternalColumns = false;//geodeConnectorConfig.isHideInternalColumns();
 
-        log.debug("Loading redis table definitions from %s", geodeConnectorConfig.getTableDescriptionDir().getAbsolutePath());
+//        log.debug("Loading redis table definitions from %s", geodeConnectorConfig.getTableDescriptionDir().getAbsolutePath());
 
         this.redisTableDescriptionSupplier = Suppliers.memoize(redisTableDescriptionSupplier::get)::get;
         this.internalFieldDescriptions = requireNonNull(internalFieldDescriptions, "internalFieldDescriptions is null");
@@ -95,7 +95,7 @@ public class RedisMetadata
     @Override
     public GeodeTableHandle getTableHandle(ConnectorSession session, SchemaTableName schemaTableName)
     {
-        RedisTableDescription table = getDefinedTables().get(schemaTableName);
+        GeodeTableDescription table = getDefinedTables().get(schemaTableName);
         if (table == null) {
             return null;
         }
@@ -116,7 +116,7 @@ public class RedisMetadata
                 keyName);
     }
 
-    private static String getDataFormat(RedisTableFieldGroup fieldGroup)
+    private static String getDataFormat(GeodeTableFieldGroup fieldGroup)
     {
         return (fieldGroup == null) ? DummyRowDecoder.NAME : fieldGroup.getDataFormat();
     }
@@ -170,37 +170,37 @@ public class RedisMetadata
     {
         GeodeTableHandle geodeTableHandle = convertTableHandle(tableHandle);
 
-        RedisTableDescription redisTableDescription = getDefinedTables().get(geodeTableHandle.toSchemaTableName());
-        if (redisTableDescription == null) {
+        GeodeTableDescription geodeTableDescription = getDefinedTables().get(geodeTableHandle.toSchemaTableName());
+        if (geodeTableDescription == null) {
             throw new TableNotFoundException(geodeTableHandle.toSchemaTableName());
         }
 
         ImmutableMap.Builder<String, ColumnHandle> columnHandles = ImmutableMap.builder();
 
         int index = 0;
-        RedisTableFieldGroup key = redisTableDescription.getKey();
+        GeodeTableFieldGroup key = geodeTableDescription.getKey();
         if (key != null) {
-            List<RedisTableFieldDescription> fields = key.getFields();
+            List<GeodeTableFieldDescription> fields = key.getFields();
             if (fields != null) {
-                for (RedisTableFieldDescription field : fields) {
+                for (GeodeTableFieldDescription field : fields) {
                     columnHandles.put(field.getName(), field.getColumnHandle(connectorId, true, index));
                     index++;
                 }
             }
         }
 
-        RedisTableFieldGroup value = redisTableDescription.getValue();
+        GeodeTableFieldGroup value = geodeTableDescription.getValue();
         if (value != null) {
-            List<RedisTableFieldDescription> fields = value.getFields();
+            List<GeodeTableFieldDescription> fields = value.getFields();
             if (fields != null) {
-                for (RedisTableFieldDescription field : fields) {
+                for (GeodeTableFieldDescription field : fields) {
                     columnHandles.put(field.getName(), field.getColumnHandle(connectorId, false, index));
                     index++;
                 }
             }
         }
 
-        for (RedisInternalFieldDescription field : internalFieldDescriptions) {
+        for (GeodeInternalFieldDescription field : internalFieldDescriptions) {
             columnHandles.put(field.getName(), field.getColumnHandle(connectorId, index, hideInternalColumns));
             index++;
         }
@@ -241,7 +241,7 @@ public class RedisMetadata
     }
 
     @VisibleForTesting
-    Map<SchemaTableName, RedisTableDescription> getDefinedTables()
+    Map<SchemaTableName, GeodeTableDescription> getDefinedTables()
     {
         return redisTableDescriptionSupplier.get();
     }
@@ -249,7 +249,7 @@ public class RedisMetadata
     @SuppressWarnings("ValueOfIncrementOrDecrementUsed")
     private ConnectorTableMetadata getTableMetadata(SchemaTableName schemaTableName)
     {
-        RedisTableDescription table = getDefinedTables().get(schemaTableName);
+        GeodeTableDescription table = getDefinedTables().get(schemaTableName);
         if (table == null) {
             throw new TableNotFoundException(schemaTableName);
         }
@@ -259,19 +259,19 @@ public class RedisMetadata
         appendFields(builder, table.getKey());
         appendFields(builder, table.getValue());
 
-        for (RedisInternalFieldDescription fieldDescription : internalFieldDescriptions) {
+        for (GeodeInternalFieldDescription fieldDescription : internalFieldDescriptions) {
             builder.add(fieldDescription.getColumnMetadata(hideInternalColumns));
         }
 
         return new ConnectorTableMetadata(schemaTableName, builder.build());
     }
 
-    private static void appendFields(ImmutableList.Builder<ColumnMetadata> builder, RedisTableFieldGroup group)
+    private static void appendFields(ImmutableList.Builder<ColumnMetadata> builder, GeodeTableFieldGroup group)
     {
         if (group != null) {
-            List<RedisTableFieldDescription> fields = group.getFields();
+            List<GeodeTableFieldDescription> fields = group.getFields();
             if (fields != null) {
-                for (RedisTableFieldDescription fieldDescription : fields) {
+                for (GeodeTableFieldDescription fieldDescription : fields) {
                     builder.add(fieldDescription.getColumnMetadata());
                 }
             }

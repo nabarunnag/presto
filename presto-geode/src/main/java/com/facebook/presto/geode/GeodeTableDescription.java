@@ -23,19 +23,19 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 /**
  * Json description to parse a Redis key/value pairs. See the documentation for the exact JSON syntax.
  */
-public class RedisTableDescription
+public class GeodeTableDescription
 {
     private final String tableName;
     private final String schemaName;
-    private final RedisTableFieldGroup key;
-    private final RedisTableFieldGroup value;
+    private final GeodeTableFieldGroup key;
+    private final GeodeTableFieldGroup value;
 
     @JsonCreator
-    public RedisTableDescription(
+    public GeodeTableDescription(
             @JsonProperty("tableName") String tableName,
             @JsonProperty("schemaName") String schemaName,
-            @JsonProperty("key") RedisTableFieldGroup key,
-            @JsonProperty("value") RedisTableFieldGroup value)
+            @JsonProperty("key") GeodeTableFieldGroup key,
+            @JsonProperty("value") GeodeTableFieldGroup value)
     {
         checkArgument(!isNullOrEmpty(tableName), "tableName is null or is empty");
         this.tableName = tableName;
@@ -57,13 +57,13 @@ public class RedisTableDescription
     }
 
     @JsonProperty
-    public RedisTableFieldGroup getKey()
+    public GeodeTableFieldGroup getKey()
     {
         return key;
     }
 
     @JsonProperty
-    public RedisTableFieldGroup getValue()
+    public GeodeTableFieldGroup getValue()
     {
         return value;
     }

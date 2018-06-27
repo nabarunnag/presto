@@ -24,7 +24,7 @@ import static com.google.common.base.MoreObjects.toStringHelper;
 import static java.util.Objects.requireNonNull;
 
 /**
- * Redis specific {@link ConnectorTableHandle}.
+ * Geode specific {@link ConnectorTableHandle}.
  */
 public final class GeodeTableHandle
         implements ConnectorTableHandle

@@ -16,7 +16,7 @@ package com.facebook.presto.geode.decoder.zset;
 import com.google.inject.Binder;
 import com.google.inject.Module;
 
-import static com.facebook.presto.geode.RedisDecoderModule.bindRowDecoder;
+import static com.facebook.presto.geode.GeodeDecoderModule.bindRowDecoder;
 
 /**
  * Guice module for the 'zset' decoder. See {@link ZsetRedisRowDecoder} for an explanation.

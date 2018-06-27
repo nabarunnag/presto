@@ -26,9 +26,9 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.util.Objects.requireNonNull;
 
 /**
- * Json description to parse a single field from a Redis key/value row. See {@link RedisTableDescription} for more details.
+ * Json description to parse a single field from a Geode key/value row. See {@link GeodeTableDescription} for more details.
  */
-public final class RedisTableFieldDescription
+public final class GeodeTableFieldDescription
 {
     private final String name;
     private final Type type;
@@ -39,7 +39,7 @@ public final class RedisTableFieldDescription
     private final boolean hidden;
 
     @JsonCreator
-    public RedisTableFieldDescription(
+    public GeodeTableFieldDescription(
             @JsonProperty("name") String name,
             @JsonProperty("type") Type type,
             @JsonProperty("mapping") String mapping,
@@ -136,7 +136,7 @@ public final class RedisTableFieldDescription
             return false;
         }
 
-        RedisTableFieldDescription other = (RedisTableFieldDescription) obj;
+        GeodeTableFieldDescription other = (GeodeTableFieldDescription) obj;
         return Objects.equals(this.name, other.name) &&
                 Objects.equals(this.type, other.type) &&
                 Objects.equals(this.mapping, other.mapping) &&

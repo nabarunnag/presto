@@ -29,19 +29,19 @@ import static java.util.Objects.requireNonNull;
 /**
  * Redis specific implementation of the Presto Connector SPI. This is a read only connector.
  */
-public class RedisConnector
+public class GeodeConnector
         implements Connector
 {
-    private final RedisMetadata metadata;
+    private final GeodeMetadata metadata;
 
-    private final RedisSplitManager splitManager;
-    private final RedisRecordSetProvider recordSetProvider;
+    private final GeodeSplitManager splitManager;
+    private final GeodeRecordSetProvider recordSetProvider;
 
     @Inject
-    public RedisConnector(
-            RedisMetadata metadata,
-            RedisSplitManager splitManager,
-            RedisRecordSetProvider recordSetProvider)
+    public GeodeConnector(
+            GeodeMetadata metadata,
+            GeodeSplitManager splitManager,
+            GeodeRecordSetProvider recordSetProvider)
     {
         this.metadata = requireNonNull(metadata, "metadata is null");
         this.splitManager = requireNonNull(splitManager, "splitManager is null");

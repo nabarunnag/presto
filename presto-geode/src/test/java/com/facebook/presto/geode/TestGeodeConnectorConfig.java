@@ -29,14 +29,14 @@ public class TestGeodeConnectorConfig
                 .setNodes("")
                 .setDefaultSchema("default")
                 .setTableNames("")
-                .setTableDescriptionDir(new File("etc/redis/"))
-                .setKeyPrefixSchemaTable(false)
-                .setRedisKeyDelimiter(":")
-                .setGeodeConnectTimeout("2000ms")
-                .setRedisDataBaseIndex(0)
-                .setGeodePassword(null)
-                .setRedisScanCount(100)
-                .setHideInternalColumns(true));
+                .setTableDescriptionDir(new File("etc/geode/")));
+//                .setKeyPrefixSchemaTable(false)
+//                .setRedisKeyDelimiter(":")
+//                .setGeodeConnectTimeout("2000ms")
+//                .setRedisDataBaseIndex(0)
+//                .setGeodePassword(null)
+//                .setRedisScanCount(100)
+//                .setHideInternalColumns(true));
     }
 
     @Test
@@ -60,14 +60,14 @@ public class TestGeodeConnectorConfig
                 .setTableDescriptionDir(new File("/var/lib/redis"))
                 .setTableNames("table1, table2, table3")
                 .setDefaultSchema("redis")
-                .setNodes("localhost:12345, localhost:23456")
-                .setHideInternalColumns(false)
-                .setRedisScanCount(20)
-                .setGeodeConnectTimeout("10s")
-                .setRedisDataBaseIndex(5)
-                .setGeodePassword("secret")
-                .setRedisKeyDelimiter(",")
-                .setKeyPrefixSchemaTable(true);
+                .setNodes("localhost:12345, localhost:23456");
+//                .setHideInternalColumns(false)
+//                .setRedisScanCount(20)
+//                .setGeodeConnectTimeout("10s")
+//                .setRedisDataBaseIndex(5)
+//                .setGeodePassword("secret")
+//                .setRedisKeyDelimiter(",")
+//                .setKeyPrefixSchemaTable(true);
 
         ConfigAssertions.assertFullMapping(properties, expected);
     }

@@ -24,15 +24,15 @@ import static io.airlift.testing.Assertions.assertInstanceOf;
 import static org.testng.Assert.assertNotNull;
 
 @Test
-public class TestRedisPlugin
+public class TestGeodePlugin
 {
     @Test
     public void testStartup()
     {
-        RedisPlugin plugin = new RedisPlugin();
+        GeodePlugin plugin = new GeodePlugin();
 
         ConnectorFactory factory = getOnlyElement(plugin.getConnectorFactories());
-        assertInstanceOf(factory, RedisConnectorFactory.class);
+        assertInstanceOf(factory, GeodeConnectorFactory.class);
 
         Connector c = factory.create(
                 "test-connector",

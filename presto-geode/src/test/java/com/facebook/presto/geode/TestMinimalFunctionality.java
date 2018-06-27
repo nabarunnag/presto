@@ -16,7 +16,7 @@ package com.facebook.presto.geode;
 import com.facebook.presto.Session;
 import com.facebook.presto.metadata.QualifiedObjectName;
 import com.facebook.presto.metadata.TableHandle;
-import com.facebook.presto.geode.util.EmbeddedRedis;
+import com.facebook.presto.geode.util.GeodeServer;
 import com.facebook.presto.geode.util.JsonEncoder;
 import com.facebook.presto.security.AllowAllAccessControl;
 import com.facebook.presto.spi.SchemaTableName;
@@ -45,27 +45,27 @@ import static org.testng.Assert.assertTrue;
 public class TestMinimalFunctionality
 {
     private static final Session SESSION = testSessionBuilder()
-            .setCatalog("redis")
+            .setCatalog("geode")
             .setSchema("default")
             .build();
 
-    private EmbeddedRedis embeddedRedis;
+    private GeodeServer geodeServer;
     private String tableName;
     private StandaloneQueryRunner queryRunner;
 
     @BeforeClass
-    public void startRedis()
+    public void startGeode()
             throws Exception
     {
-        embeddedRedis = EmbeddedRedis.createEmbeddedRedis();
-        embeddedRedis.start();
+        geodeServer = GeodeServer.createGeodeServerLauncher();
+        geodeServer.start();
     }
 
     @AfterClass(alwaysRun = true)
-    public void stopRedis()
+    public void stopGeodeServer()
     {
-        embeddedRedis.close();
-        embeddedRedis = null;
+        geodeServer.close();
+        geodeServer = null;
     }
 
     @BeforeMethod
@@ -76,7 +76,7 @@ public class TestMinimalFunctionality
 
         this.queryRunner = new StandaloneQueryRunner(SESSION);
 
-        installRedisPlugin(embeddedRedis, queryRunner,
+        installRedisPlugin(geodeServer, queryRunner,
                 ImmutableMap.<SchemaTableName, RedisTableDescription>builder()
                         .put(createEmptyTableDescription(new SchemaTableName("default", tableName)))
                         .build());
@@ -94,7 +94,7 @@ public class TestMinimalFunctionality
         JsonEncoder jsonEncoder = new JsonEncoder();
         for (long i = 0; i < count; i++) {
             Object value = ImmutableMap.of("id", Long.toString(i), "value", UUID.randomUUID().toString());
-            try (Jedis jedis = embeddedRedis.getJedisPool().getResource()) {
+            try (Jedis jedis = geodeServer.getJedisPool().getResource()) {
                 jedis.set(tableName + ":" + i, jsonEncoder.toString(value));
             }
         }

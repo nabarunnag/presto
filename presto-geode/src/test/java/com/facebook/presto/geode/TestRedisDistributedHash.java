@@ -13,35 +13,35 @@
  */
 package com.facebook.presto.geode;
 
-import com.facebook.presto.geode.util.EmbeddedRedis;
+import com.facebook.presto.geode.util.GeodeServer;
 import com.facebook.presto.tests.AbstractTestQueries;
 import io.airlift.tpch.TpchTable;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.Test;
 
-import static com.facebook.presto.geode.util.EmbeddedRedis.createEmbeddedRedis;
+import static com.facebook.presto.geode.util.GeodeServer.createGeodeServerLauncher;
 
 @Test
-public class TestRedisDistributed
+public class TestRedisDistributedHash
         extends AbstractTestQueries
 {
-    private final EmbeddedRedis embeddedRedis;
+    private final GeodeServer geodeServer;
 
-    public TestRedisDistributed()
+    public TestRedisDistributedHash()
             throws Exception
     {
-        this(createEmbeddedRedis());
+        this(createGeodeServerLauncher());
     }
 
-    public TestRedisDistributed(EmbeddedRedis embeddedRedis)
+    public TestRedisDistributedHash(GeodeServer geodeServer)
     {
-        super(() -> RedisQueryRunner.createRedisQueryRunner(embeddedRedis, "string", TpchTable.getTables()));
-        this.embeddedRedis = embeddedRedis;
+        super(() -> RedisQueryRunner.createRedisQueryRunner(geodeServer, "hash", TpchTable.getTables()));
+        this.geodeServer = geodeServer;
     }
 
     @AfterClass(alwaysRun = true)
     public void destroy()
     {
-        embeddedRedis.close();
+        geodeServer.close();
     }
 }

@@ -17,7 +17,7 @@ import com.facebook.presto.Session;
 import com.facebook.presto.metadata.Metadata;
 import com.facebook.presto.metadata.QualifiedObjectName;
 import com.facebook.presto.geode.util.CodecSupplier;
-import com.facebook.presto.geode.util.EmbeddedRedis;
+import com.facebook.presto.geode.util.GeodeServer;
 import com.facebook.presto.geode.util.RedisTestUtils;
 import com.facebook.presto.spi.SchemaTableName;
 import com.facebook.presto.tests.DistributedQueryRunner;
@@ -49,13 +49,13 @@ public final class RedisQueryRunner
     private static final Logger log = Logger.get("TestQueries");
     private static final String TPCH_SCHEMA = "tpch";
 
-    public static DistributedQueryRunner createRedisQueryRunner(EmbeddedRedis embeddedRedis, String dataFormat, TpchTable<?>... tables)
+    public static DistributedQueryRunner createRedisQueryRunner(GeodeServer geodeServer, String dataFormat, TpchTable<?>... tables)
             throws Exception
     {
-        return createRedisQueryRunner(embeddedRedis, dataFormat, ImmutableList.copyOf(tables));
+        return createRedisQueryRunner(geodeServer, dataFormat, ImmutableList.copyOf(tables));
     }
 
-    public static DistributedQueryRunner createRedisQueryRunner(EmbeddedRedis embeddedRedis, String dataFormat, Iterable<TpchTable<?>> tables)
+    public static DistributedQueryRunner createRedisQueryRunner(GeodeServer geodeServer, String dataFormat, Iterable<TpchTable<?>> tables)
             throws Exception
     {
         DistributedQueryRunner queryRunner = null;
@@ -65,35 +65,35 @@ public final class RedisQueryRunner
             queryRunner.installPlugin(new TpchPlugin());
             queryRunner.createCatalog("tpch", "tpch");
 
-            embeddedRedis.start();
+            geodeServer.start();
 
             Map<SchemaTableName, RedisTableDescription> tableDescriptions = createTpchTableDescriptions(queryRunner.getCoordinator().getMetadata(), tables, dataFormat);
 
-            installRedisPlugin(embeddedRedis, queryRunner, tableDescriptions);
+            installRedisPlugin(geodeServer, queryRunner, tableDescriptions);
 
             TestingPrestoClient prestoClient = queryRunner.getClient();
 
             log.info("Loading data...");
             long startTime = System.nanoTime();
             for (TpchTable<?> table : tables) {
-                loadTpchTable(embeddedRedis, prestoClient, table, dataFormat);
+                loadTpchTable(geodeServer, prestoClient, table, dataFormat);
             }
             log.info("Loading complete in %s", nanosSince(startTime).toString(SECONDS));
-            embeddedRedis.destroyJedisPool();
+            geodeServer.destroyJedisPool();
             return queryRunner;
         }
         catch (Throwable e) {
-            closeAllSuppress(e, queryRunner, embeddedRedis);
+            closeAllSuppress(e, queryRunner, geodeServer);
             throw e;
         }
     }
 
-    private static void loadTpchTable(EmbeddedRedis embeddedRedis, TestingPrestoClient prestoClient, TpchTable<?> table, String dataFormat)
+    private static void loadTpchTable(GeodeServer geodeServer, TestingPrestoClient prestoClient, TpchTable<?> table, String dataFormat)
     {
         long start = System.nanoTime();
         log.info("Running import for %s", table.getTableName());
         RedisTestUtils.loadTpchTable(
-                embeddedRedis,
+            geodeServer,
                 prestoClient,
                 redisTableName(table),
                 new QualifiedObjectName("tpch", TINY_SCHEMA_NAME, table.getTableName().toLowerCase(ENGLISH)),

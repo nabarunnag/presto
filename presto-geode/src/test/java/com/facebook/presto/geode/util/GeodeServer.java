@@ -13,69 +13,53 @@
  */
 package com.facebook.presto.geode.util;
 
-import redis.clients.jedis.JedisPool;
-import redis.clients.jedis.JedisPoolConfig;
-import redis.embedded.RedisServer;
-
 import java.io.Closeable;
 import java.io.IOException;
 import java.net.URISyntaxException;
 
-public class EmbeddedRedis
+import org.apache.geode.distributed.ServerLauncher;
+
+public class GeodeServer
         implements Closeable
 {
-    private final RedisServer redisServer;
-    private JedisPool jedisPool;
+    private final ServerLauncher serverLauncher;
 
-    public static EmbeddedRedis createEmbeddedRedis()
+    public static GeodeServer createGeodeServerLauncher()
             throws IOException, URISyntaxException
     {
-        return new EmbeddedRedis();
+        return new GeodeServer();
     }
 
-    EmbeddedRedis()
+    GeodeServer()
             throws IOException, URISyntaxException
     {
-        redisServer = new RedisServer();
+        this.serverLauncher = new ServerLauncher.Builder()
+            .setMemberName("server")
+            .setServerPort(40404)
+            .set("locators","localhost[10334]")
+            .build();
+
     }
 
     public void start()
-            throws IOException
-    {
-        redisServer.start();
-        jedisPool = new JedisPool(new JedisPoolConfig(), getConnectString(), getPort());
-    }
-
-    public JedisPool getJedisPool()
-    {
-        return jedisPool;
-    }
-
-    public void destroyJedisPool()
-    {
-        jedisPool.destroy();
+        throws IOException, URISyntaxException {
+        GeodeLocator.createLocator().run();
+        serverLauncher.start();
     }
 
     @Override
     public void close()
     {
-        jedisPool.destroy();
-        try {
-            redisServer.stop();
-        }
-        catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw new RuntimeException(e);
-        }
+       serverLauncher.stop();
     }
 
     public int getPort()
     {
-        return redisServer.getPort();
+        return serverLauncher.getServerPort();
     }
 
     public String getConnectString()
     {
-        return "localhost";
+        return serverLauncher.getHostNameForClients();
     }
 }

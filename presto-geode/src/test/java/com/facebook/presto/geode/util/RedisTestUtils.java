@@ -35,14 +35,14 @@ public final class RedisTestUtils
 {
     private RedisTestUtils() {}
 
-    public static void installRedisPlugin(EmbeddedRedis embeddedRedis, QueryRunner queryRunner, Map<SchemaTableName, RedisTableDescription> tableDescriptions)
+    public static void installRedisPlugin(GeodeServer geodeServer, QueryRunner queryRunner, Map<SchemaTableName, RedisTableDescription> tableDescriptions)
     {
         RedisPlugin redisPlugin = new RedisPlugin();
         redisPlugin.setTableDescriptionSupplier(() -> tableDescriptions);
         queryRunner.installPlugin(redisPlugin);
 
         Map<String, String> redisConfig = ImmutableMap.of(
-                "redis.nodes", embeddedRedis.getConnectString() + ":" + embeddedRedis.getPort(),
+                "redis.nodes", geodeServer.getConnectString() + ":" + geodeServer.getPort(),
                 "redis.table-names", Joiner.on(",").join(tableDescriptions.keySet()),
                 "redis.default-schema", "default",
                 "redis.hide-internal-columns", "true",
@@ -50,9 +50,10 @@ public final class RedisTestUtils
         queryRunner.createCatalog("redis", "redis", redisConfig);
     }
 
-    public static void loadTpchTable(EmbeddedRedis embeddedRedis, TestingPrestoClient prestoClient, String tableName, QualifiedObjectName tpchTableName, String dataFormat)
+    public static void loadTpchTable(GeodeServer geodeServer, TestingPrestoClient prestoClient, String tableName, QualifiedObjectName tpchTableName, String dataFormat)
     {
-        RedisLoader tpchLoader = new RedisLoader(prestoClient.getServer(), prestoClient.getDefaultSession(), embeddedRedis.getJedisPool(), tableName, dataFormat);
+        RedisLoader tpchLoader = new RedisLoader(prestoClient.getServer(), prestoClient.getDefaultSession(), geodeServer
+            .getJedisPool(), tableName, dataFormat);
         tpchLoader.execute(format("SELECT * from %s", tpchTableName));
     }
 

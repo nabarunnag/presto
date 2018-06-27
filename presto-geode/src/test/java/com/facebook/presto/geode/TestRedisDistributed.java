@@ -13,36 +13,35 @@
  */
 package com.facebook.presto.geode;
 
-import com.facebook.presto.geode.util.EmbeddedRedis;
-import com.facebook.presto.tests.AbstractTestIntegrationSmokeTest;
+import com.facebook.presto.geode.util.GeodeServer;
+import com.facebook.presto.tests.AbstractTestQueries;
+import io.airlift.tpch.TpchTable;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.Test;
 
-import static com.facebook.presto.geode.RedisQueryRunner.createRedisQueryRunner;
-import static com.facebook.presto.geode.util.EmbeddedRedis.createEmbeddedRedis;
-import static io.airlift.tpch.TpchTable.ORDERS;
+import static com.facebook.presto.geode.util.GeodeServer.createGeodeServerLauncher;
 
 @Test
-public class TestRedisIntegrationSmokeTest
-        extends AbstractTestIntegrationSmokeTest
+public class TestRedisDistributed
+        extends AbstractTestQueries
 {
-    private final EmbeddedRedis embeddedRedis;
+    private final GeodeServer geodeServer;
 
-    public TestRedisIntegrationSmokeTest()
+    public TestRedisDistributed()
             throws Exception
     {
-        this(createEmbeddedRedis());
+        this(createGeodeServerLauncher());
     }
 
-    public TestRedisIntegrationSmokeTest(EmbeddedRedis embeddedRedis)
+    public TestRedisDistributed(GeodeServer geodeServer)
     {
-        super(() -> createRedisQueryRunner(embeddedRedis, "string", ORDERS));
-        this.embeddedRedis = embeddedRedis;
+        super(() -> RedisQueryRunner.createRedisQueryRunner(geodeServer, "string", TpchTable.getTables()));
+        this.geodeServer = geodeServer;
     }
 
     @AfterClass(alwaysRun = true)
     public void destroy()
     {
-        embeddedRedis.close();
+        geodeServer.close();
     }
 }

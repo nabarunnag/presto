@@ -11,7 +11,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.facebook.presto.geode;
+package com.facebook.presto.redis;
 
 import com.facebook.presto.decoder.DecoderColumnHandle;
 import com.facebook.presto.decoder.FieldDecoder;
@@ -35,12 +35,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static com.facebook.presto.geode.RedisInternalFieldDescription.KEY_CORRUPT_FIELD;
-import static com.facebook.presto.geode.RedisInternalFieldDescription.KEY_FIELD;
-import static com.facebook.presto.geode.RedisInternalFieldDescription.KEY_LENGTH_FIELD;
-import static com.facebook.presto.geode.RedisInternalFieldDescription.VALUE_CORRUPT_FIELD;
-import static com.facebook.presto.geode.RedisInternalFieldDescription.VALUE_FIELD;
-import static com.facebook.presto.geode.RedisInternalFieldDescription.VALUE_LENGTH_FIELD;
+import static com.facebook.presto.redis.RedisInternalFieldDescription.KEY_CORRUPT_FIELD;
+import static com.facebook.presto.redis.RedisInternalFieldDescription.KEY_FIELD;
+import static com.facebook.presto.redis.RedisInternalFieldDescription.KEY_LENGTH_FIELD;
+import static com.facebook.presto.redis.RedisInternalFieldDescription.VALUE_CORRUPT_FIELD;
+import static com.facebook.presto.redis.RedisInternalFieldDescription.VALUE_FIELD;
+import static com.facebook.presto.redis.RedisInternalFieldDescription.VALUE_LENGTH_FIELD;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.lang.String.format;
 import static redis.clients.jedis.ScanParams.SCAN_POINTER_START;
@@ -268,7 +268,7 @@ public class RedisRecordCursor
     {
         if (split.getKeyDataType() == RedisDataType.STRING) {
             ScanParams scanParms = new ScanParams();
-            scanParms.count(redisJedisManager.getGeodeConnectorConfig().getRedisScanCount());
+            scanParms.count(redisJedisManager.getRedisConnectorConfig().getRedisScanCount());
 
             // when Redis key string follows "schema:table:*" format
             // scan command can efficiently query tables
@@ -280,12 +280,12 @@ public class RedisRecordCursor
 
             // "default" schema is not prefixed to the key
 
-            if (redisJedisManager.getGeodeConnectorConfig().isKeyPrefixSchemaTable()) {
+            if (redisJedisManager.getRedisConnectorConfig().isKeyPrefixSchemaTable()) {
                 String keyMatch = "";
                 if (!split.getSchemaName().equals("default")) {
-                    keyMatch = split.getSchemaName() + Character.toString(redisJedisManager.getGeodeConnectorConfig().getRedisKeyDelimiter());
+                    keyMatch = split.getSchemaName() + Character.toString(redisJedisManager.getRedisConnectorConfig().getRedisKeyDelimiter());
                 }
-                keyMatch = keyMatch + split.getTableName() + Character.toString(redisJedisManager.getGeodeConnectorConfig().getRedisKeyDelimiter()) + "*";
+                keyMatch = keyMatch + split.getTableName() + Character.toString(redisJedisManager.getRedisConnectorConfig().getRedisKeyDelimiter()) + "*";
                 scanParms.match(keyMatch);
             }
             return scanParms;

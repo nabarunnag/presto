@@ -11,7 +11,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.facebook.presto.geode;
+package com.facebook.presto.redis;
 
 import com.facebook.presto.decoder.dummy.DummyRowDecoder;
 import com.facebook.presto.spi.SchemaTableName;
@@ -42,13 +42,13 @@ public class RedisTableDescriptionSupplier
 {
     private static final Logger log = Logger.get(RedisTableDescriptionSupplier.class);
 
-    private final GeodeConnectorConfig geodeConnectorConfig;
+    private final RedisConnectorConfig redisConnectorConfig;
     private final JsonCodec<RedisTableDescription> tableDescriptionCodec;
 
     @Inject
-    RedisTableDescriptionSupplier(GeodeConnectorConfig geodeConnectorConfig, JsonCodec<RedisTableDescription> tableDescriptionCodec)
+    RedisTableDescriptionSupplier(RedisConnectorConfig redisConnectorConfig, JsonCodec<RedisTableDescription> tableDescriptionCodec)
     {
-        this.geodeConnectorConfig = requireNonNull(geodeConnectorConfig, "geodeConnectorConfig is null");
+        this.redisConnectorConfig = requireNonNull(redisConnectorConfig, "redisConnectorConfig is null");
         this.tableDescriptionCodec = requireNonNull(tableDescriptionCodec, "tableDescriptionCodec is null");
     }
 
@@ -58,10 +58,10 @@ public class RedisTableDescriptionSupplier
         ImmutableMap.Builder<SchemaTableName, RedisTableDescription> builder = ImmutableMap.builder();
 
         try {
-            for (File file : listFiles(geodeConnectorConfig.getTableDescriptionDir())) {
+            for (File file : listFiles(redisConnectorConfig.getTableDescriptionDir())) {
                 if (file.isFile() && file.getName().endsWith(".json")) {
                     RedisTableDescription table = tableDescriptionCodec.fromJson(readAllBytes(file.toPath()));
-                    String schemaName = firstNonNull(table.getSchemaName(), geodeConnectorConfig.getDefaultSchema());
+                    String schemaName = firstNonNull(table.getSchemaName(), redisConnectorConfig.getDefaultSchema());
                     log.debug("Redis table %s.%s: %s", schemaName, table.getTableName(), table);
                     builder.put(new SchemaTableName(schemaName, table.getTableName()), table);
                 }
@@ -72,13 +72,13 @@ public class RedisTableDescriptionSupplier
             log.debug("Loaded table definitions: %s", tableDefinitions.keySet());
 
             builder = ImmutableMap.builder();
-            for (String definedTable : geodeConnectorConfig.getTableNames()) {
+            for (String definedTable : redisConnectorConfig.getTableNames()) {
                 SchemaTableName tableName;
                 try {
                     tableName = parseTableName(definedTable);
                 }
                 catch (IllegalArgumentException iae) {
-                    tableName = new SchemaTableName(geodeConnectorConfig.getDefaultSchema(), definedTable);
+                    tableName = new SchemaTableName(redisConnectorConfig.getDefaultSchema(), definedTable);
                 }
 
                 if (tableDefinitions.containsKey(tableName)) {

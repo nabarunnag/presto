@@ -11,7 +11,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.facebook.presto.geode;
+package com.facebook.presto.redis;
 
 import com.facebook.presto.spi.type.Type;
 import com.facebook.presto.spi.type.TypeManager;
@@ -48,7 +48,7 @@ public class RedisConnectorModule
 
         binder.bind(RedisJedisManager.class).in(Scopes.SINGLETON);
 
-        configBinder(binder).bindConfig(GeodeConnectorConfig.class);
+        configBinder(binder).bindConfig(RedisConnectorConfig.class);
 
         jsonBinder(binder).addDeserializerBinding(Type.class).to(TypeDeserializer.class);
         jsonCodecBinder(binder).bindJsonCodec(RedisTableDescription.class);

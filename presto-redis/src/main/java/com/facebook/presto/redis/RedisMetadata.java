@@ -11,7 +11,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.facebook.presto.geode;
+package com.facebook.presto.redis;
 
 import com.facebook.presto.decoder.dummy.DummyRowDecoder;
 import com.facebook.presto.spi.ColumnHandle;
@@ -43,9 +43,9 @@ import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import static com.facebook.presto.geode.RedisHandleResolver.convertColumnHandle;
-import static com.facebook.presto.geode.RedisHandleResolver.convertLayout;
-import static com.facebook.presto.geode.RedisHandleResolver.convertTableHandle;
+import static com.facebook.presto.redis.RedisHandleResolver.convertColumnHandle;
+import static com.facebook.presto.redis.RedisHandleResolver.convertLayout;
+import static com.facebook.presto.redis.RedisHandleResolver.convertTableHandle;
 import static java.util.Objects.requireNonNull;
 
 /**
@@ -66,17 +66,17 @@ public class RedisMetadata
 
     @Inject
     RedisMetadata(
-            GeodeConnectorId connectorId,
-            GeodeConnectorConfig geodeConnectorConfig,
+            RedisConnectorId connectorId,
+            RedisConnectorConfig redisConnectorConfig,
             Supplier<Map<SchemaTableName, RedisTableDescription>> redisTableDescriptionSupplier,
             Set<RedisInternalFieldDescription> internalFieldDescriptions)
     {
         this.connectorId = requireNonNull(connectorId, "connectorId is null").toString();
 
-        requireNonNull(geodeConnectorConfig, "redisConfig is null");
-        hideInternalColumns = geodeConnectorConfig.isHideInternalColumns();
+        requireNonNull(redisConnectorConfig, "redisConfig is null");
+        hideInternalColumns = redisConnectorConfig.isHideInternalColumns();
 
-        log.debug("Loading redis table definitions from %s", geodeConnectorConfig.getTableDescriptionDir().getAbsolutePath());
+        log.debug("Loading redis table definitions from %s", redisConnectorConfig.getTableDescriptionDir().getAbsolutePath());
 
         this.redisTableDescriptionSupplier = Suppliers.memoize(redisTableDescriptionSupplier::get)::get;
         this.internalFieldDescriptions = requireNonNull(internalFieldDescriptions, "internalFieldDescriptions is null");
@@ -93,7 +93,7 @@ public class RedisMetadata
     }
 
     @Override
-    public GeodeTableHandle getTableHandle(ConnectorSession session, SchemaTableName schemaTableName)
+    public RedisTableHandle getTableHandle(ConnectorSession session, SchemaTableName schemaTableName)
     {
         RedisTableDescription table = getDefinedTables().get(schemaTableName);
         if (table == null) {
@@ -107,7 +107,7 @@ public class RedisMetadata
             keyName = table.getKey().getName();
         }
 
-        return new GeodeTableHandle(
+        return new RedisTableHandle(
                 connectorId,
                 schemaTableName.getSchemaName(),
                 schemaTableName.getTableName(),
@@ -134,7 +134,7 @@ public class RedisMetadata
             Constraint<ColumnHandle> constraint,
             Optional<Set<ColumnHandle>> desiredColumns)
     {
-        GeodeTableHandle tableHandle = convertTableHandle(table);
+        RedisTableHandle tableHandle = convertTableHandle(table);
 
         ConnectorTableLayout layout = new ConnectorTableLayout(new RedisTableLayoutHandle(tableHandle));
 
@@ -168,11 +168,11 @@ public class RedisMetadata
     @Override
     public Map<String, ColumnHandle> getColumnHandles(ConnectorSession session, ConnectorTableHandle tableHandle)
     {
-        GeodeTableHandle geodeTableHandle = convertTableHandle(tableHandle);
+        RedisTableHandle redisTableHandle = convertTableHandle(tableHandle);
 
-        RedisTableDescription redisTableDescription = getDefinedTables().get(geodeTableHandle.toSchemaTableName());
+        RedisTableDescription redisTableDescription = getDefinedTables().get(redisTableHandle.toSchemaTableName());
         if (redisTableDescription == null) {
-            throw new TableNotFoundException(geodeTableHandle.toSchemaTableName());
+            throw new TableNotFoundException(redisTableHandle.toSchemaTableName());
         }
 
         ImmutableMap.Builder<String, ColumnHandle> columnHandles = ImmutableMap.builder();

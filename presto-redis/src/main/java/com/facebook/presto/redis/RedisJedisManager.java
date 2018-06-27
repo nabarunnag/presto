@@ -11,7 +11,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.facebook.presto.geode;
+package com.facebook.presto.redis;
 
 import com.facebook.presto.spi.HostAddress;
 import com.facebook.presto.spi.NodeManager;
@@ -39,15 +39,15 @@ public class RedisJedisManager
 
     private final LoadingCache<HostAddress, JedisPool> jedisPoolCache;
 
-    private final GeodeConnectorConfig geodeConnectorConfig;
+    private final RedisConnectorConfig redisConnectorConfig;
     private final JedisPoolConfig jedisPoolConfig;
 
     @Inject
     RedisJedisManager(
-            GeodeConnectorConfig geodeConnectorConfig,
+            RedisConnectorConfig redisConnectorConfig,
             NodeManager nodeManager)
     {
-        this.geodeConnectorConfig = requireNonNull(geodeConnectorConfig, "redisConfig is null");
+        this.redisConnectorConfig = requireNonNull(redisConnectorConfig, "redisConfig is null");
         this.jedisPoolCache = CacheBuilder.newBuilder().build(CacheLoader.from(this::createConsumer));
         this.jedisPoolConfig = new JedisPoolConfig();
     }
@@ -65,9 +65,9 @@ public class RedisJedisManager
         }
     }
 
-    public GeodeConnectorConfig getGeodeConnectorConfig()
+    public RedisConnectorConfig getRedisConnectorConfig()
     {
-        return geodeConnectorConfig;
+        return redisConnectorConfig;
     }
 
     public JedisPool getJedisPool(HostAddress host)
@@ -82,8 +82,8 @@ public class RedisJedisManager
         return new JedisPool(jedisPoolConfig,
                 host.getHostText(),
                 host.getPort(),
-                toIntExact(geodeConnectorConfig.getGeodeConnectTimeout().toMillis()),
-                geodeConnectorConfig.getGeodePassword(),
-                geodeConnectorConfig.getRedisDataBaseIndex());
+                toIntExact(redisConnectorConfig.getRedisConnectTimeout().toMillis()),
+                redisConnectorConfig.getRedisPassword(),
+                redisConnectorConfig.getRedisDataBaseIndex());
     }
 }

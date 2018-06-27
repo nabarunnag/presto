@@ -11,7 +11,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.facebook.presto.geode;
+package com.facebook.presto.redis;
 
 import com.facebook.presto.spi.ConnectorSession;
 import com.facebook.presto.spi.ConnectorSplit;
@@ -30,7 +30,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import static com.facebook.presto.geode.RedisHandleResolver.convertLayout;
+import static com.facebook.presto.redis.RedisHandleResolver.convertLayout;
 import static com.google.common.base.Preconditions.checkState;
 import static java.util.Objects.requireNonNull;
 
@@ -41,7 +41,7 @@ public class RedisSplitManager
         implements ConnectorSplitManager
 {
     private final String connectorId;
-    private final GeodeConnectorConfig geodeConnectorConfig;
+    private final RedisConnectorConfig redisConnectorConfig;
     private final RedisJedisManager jedisManager;
 
     private static final long REDIS_MAX_SPLITS = 100;
@@ -49,21 +49,21 @@ public class RedisSplitManager
 
     @Inject
     public RedisSplitManager(
-            GeodeConnectorId connectorId,
-            GeodeConnectorConfig geodeConnectorConfig,
+            RedisConnectorId connectorId,
+            RedisConnectorConfig redisConnectorConfig,
             RedisJedisManager jedisManager)
     {
         this.connectorId = requireNonNull(connectorId, "connectorId is null").toString();
-        this.geodeConnectorConfig = requireNonNull(geodeConnectorConfig, "redisConfig is null");
+        this.redisConnectorConfig = requireNonNull(redisConnectorConfig, "redisConfig is null");
         this.jedisManager = requireNonNull(jedisManager, "jedisManager is null");
     }
 
     @Override
     public ConnectorSplitSource getSplits(ConnectorTransactionHandle transaction, ConnectorSession session, ConnectorTableLayoutHandle layout, SplitSchedulingStrategy splitSchedulingStrategy)
     {
-        GeodeTableHandle geodeTableHandle = convertLayout(layout).getTable();
+        RedisTableHandle redisTableHandle = convertLayout(layout).getTable();
 
-        List<HostAddress> nodes = new ArrayList<>(geodeConnectorConfig.getNodes());
+        List<HostAddress> nodes = new ArrayList<>(redisConnectorConfig.getNodes());
         Collections.shuffle(nodes);
 
         checkState(!nodes.isEmpty(), "No Redis nodes available");
@@ -72,9 +72,9 @@ public class RedisSplitManager
         long numberOfKeys = 1;
         // when Redis keys are provides in a zset, create multiple
         // splits by splitting zset in chunks
-        if (geodeTableHandle.getKeyDataFormat().equals("zset")) {
+        if (redisTableHandle.getKeyDataFormat().equals("zset")) {
             try (Jedis jedis = jedisManager.getJedisPool(nodes.get(0)).getResource()) {
-                numberOfKeys = jedis.zcount(geodeTableHandle.getKeyName(), "-inf", "+inf");
+                numberOfKeys = jedis.zcount(redisTableHandle.getKeyName(), "-inf", "+inf");
             }
         }
 
@@ -91,11 +91,11 @@ public class RedisSplitManager
             }
 
             RedisSplit split = new RedisSplit(connectorId,
-                    geodeTableHandle.getSchemaName(),
-                    geodeTableHandle.getTableName(),
-                    geodeTableHandle.getKeyDataFormat(),
-                    geodeTableHandle.getValueDataFormat(),
-                    geodeTableHandle.getKeyName(),
+                    redisTableHandle.getSchemaName(),
+                    redisTableHandle.getTableName(),
+                    redisTableHandle.getKeyDataFormat(),
+                    redisTableHandle.getValueDataFormat(),
+                    redisTableHandle.getKeyName(),
                     startIndex,
                     endIndex,
                     nodes);

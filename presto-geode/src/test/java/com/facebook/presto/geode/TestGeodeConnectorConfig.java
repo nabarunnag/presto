@@ -30,7 +30,6 @@ public class TestGeodeConnectorConfig
                 .setDefaultSchema("default")
                 .setTableNames("")
                 .setTableDescriptionDir(new File("etc/redis/"))
-                .setKeyPrefixSchemaTable(false)
                 .setRedisKeyDelimiter(":")
                 .setGeodeConnectTimeout("2000ms")
                 .setRedisDataBaseIndex(0)

@@ -65,22 +65,22 @@ public class GeodeLoader
     private final String dataFormat;
     private final AtomicLong count = new AtomicLong();
     private final JsonEncoder jsonEncoder;
-    private final ClientCache clientCache;
+    /*private final ClientCache clientCache;*/
 
     public GeodeLoader(
             TestingPrestoServer prestoServer,
             Session defaultSession,
             GeodeServer geodeServer,
             String tableName,
-            String dataFormat,
-            ClientCache clientCache)
+            String dataFormat
+            /*ClientCache clientCache*/)
     {
         super(prestoServer, defaultSession);
         this.geodeServer = geodeServer;
         this.tableName = tableName;
         this.dataFormat = dataFormat;
         jsonEncoder = new JsonEncoder();
-        this.clientCache = clientCache;
+        /*this.clientCache = clientCache;*/
 
     }
 
@@ -114,7 +114,9 @@ public class GeodeLoader
             if (data.getData() != null) {
                 checkState(types.get() != null, "Data without types received!");
                 List<Column> columns = statusInfo.getColumns();
-
+              ClientCacheFactory
+                  clientCacheFactory = new ClientCacheFactory().set("cache-xml-file","/Users/nnag/Development/prestodb/presto/presto-geode/src/test/java/com/facebook/presto/geode/util/client-cache.xml");
+              ClientCache clientCache = clientCacheFactory.create();
                 for (List<Object> fields : data.getData()) {
                     String redisKey = tableName + ":" + count.getAndIncrement();
                     Region region = clientCache.getRegion("region");

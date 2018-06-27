@@ -58,7 +58,7 @@ public class RedisRecordCursor
 
     private final RedisSplit split;
     private final List<DecoderColumnHandle> columnHandles;
-    private final RedisJedisManager redisJedisManager;
+    private final GeodeClientConnections geodeClientConnections;
     private final JedisPool jedisPool;
     private final ScanParams scanParms;
 
@@ -82,7 +82,7 @@ public class RedisRecordCursor
             Map<DecoderColumnHandle, FieldDecoder<?>> valueFieldDecoders,
             RedisSplit split,
             List<DecoderColumnHandle> columnHandles,
-            RedisJedisManager redisJedisManager)
+            GeodeClientConnections geodeClientConnections)
     {
         this.keyDecoder = keyDecoder;
         this.valueDecoder = valueDecoder;
@@ -90,8 +90,8 @@ public class RedisRecordCursor
         this.valueFieldDecoders = valueFieldDecoders;
         this.split = split;
         this.columnHandles = columnHandles;
-        this.redisJedisManager = redisJedisManager;
-        this.jedisPool = redisJedisManager.getJedisPool(split.getNodes().get(0));
+        this.geodeClientConnections = geodeClientConnections;
+        this.jedisPool = geodeClientConnections.getClientCache(split.getNodes().get(0));
         this.scanParms = setScanParms();
 
         fetchKeys();
@@ -268,7 +268,7 @@ public class RedisRecordCursor
     {
         if (split.getKeyDataType() == RedisDataType.STRING) {
             ScanParams scanParms = new ScanParams();
-            scanParms.count(redisJedisManager.getGeodeConnectorConfig().getRedisScanCount());
+            scanParms.count(geodeClientConnections.getGeodeConnectorConfig().getRedisScanCount());
 
             // when Redis key string follows "schema:table:*" format
             // scan command can efficiently query tables
@@ -280,12 +280,14 @@ public class RedisRecordCursor
 
             // "default" schema is not prefixed to the key
 
-            if (redisJedisManager.getGeodeConnectorConfig().isKeyPrefixSchemaTable()) {
+            if (geodeClientConnections.getGeodeConnectorConfig().isKeyPrefixSchemaTable()) {
                 String keyMatch = "";
                 if (!split.getSchemaName().equals("default")) {
-                    keyMatch = split.getSchemaName() + Character.toString(redisJedisManager.getGeodeConnectorConfig().getRedisKeyDelimiter());
+                    keyMatch = split.getSchemaName() + Character.toString(
+                        geodeClientConnections.getGeodeConnectorConfig().getRedisKeyDelimiter());
                 }
-                keyMatch = keyMatch + split.getTableName() + Character.toString(redisJedisManager.getGeodeConnectorConfig().getRedisKeyDelimiter()) + "*";
+                keyMatch = keyMatch + split.getTableName() + Character.toString(
+                    geodeClientConnections.getGeodeConnectorConfig().getRedisKeyDelimiter()) + "*";
                 scanParms.match(keyMatch);
             }
             return scanParms;

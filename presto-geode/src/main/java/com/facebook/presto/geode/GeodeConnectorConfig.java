@@ -21,7 +21,7 @@ import static com.google.common.collect.Iterables.transform;
 
 public class GeodeConnectorConfig
 {
-    private static final int GEODE_DEFAULT_PORT = 6379;
+    private static final int GEODE_DEFAULT_PORT = 10334;
 //
 //    /**
 //     * Seed nodes for Redis cluster. At least one must exist.
@@ -224,5 +224,13 @@ public class GeodeConnectorConfig
     private static HostAddress toHostAddress(String value)
     {
         return HostAddress.fromString(value).withDefaultPort(GEODE_DEFAULT_PORT);
+    }
+
+    public int getPort() {
+        return GEODE_DEFAULT_PORT;
+    }
+
+    public String getHost() {
+        return "localhost";
     }
 }

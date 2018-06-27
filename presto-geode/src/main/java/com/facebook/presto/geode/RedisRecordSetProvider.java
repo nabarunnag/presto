@@ -40,11 +40,11 @@ import static java.util.Objects.requireNonNull;
 public class RedisRecordSetProvider
         implements ConnectorRecordSetProvider
 {
-    private final RedisJedisManager jedisManager;
+    private final GeodeClientConnections jedisManager;
     private final DecoderRegistry registry;
 
     @Inject
-    public RedisRecordSetProvider(DecoderRegistry registry, RedisJedisManager jedisManager)
+    public RedisRecordSetProvider(DecoderRegistry registry, GeodeClientConnections jedisManager)
     {
         this.registry = requireNonNull(registry, "registry is null");
         this.jedisManager = requireNonNull(jedisManager, "jedisManager is null");

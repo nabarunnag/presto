@@ -33,7 +33,7 @@ public class RedisRecordSet
         implements RecordSet
 {
     private final RedisSplit split;
-    private final RedisJedisManager jedisManager;
+    private final GeodeClientConnections jedisManager;
 
     private final RowDecoder keyDecoder;
     private final RowDecoder valueDecoder;
@@ -45,7 +45,7 @@ public class RedisRecordSet
 
     RedisRecordSet(
             RedisSplit split,
-            RedisJedisManager jedisManager,
+            GeodeClientConnections jedisManager,
             List<DecoderColumnHandle> columnHandles,
             RowDecoder keyDecoder,
             RowDecoder valueDecoder,

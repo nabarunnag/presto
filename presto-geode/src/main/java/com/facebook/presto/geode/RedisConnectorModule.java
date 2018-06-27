@@ -46,7 +46,7 @@ public class RedisConnectorModule
         binder.bind(RedisSplitManager.class).in(Scopes.SINGLETON);
         binder.bind(RedisRecordSetProvider.class).in(Scopes.SINGLETON);
 
-        binder.bind(RedisJedisManager.class).in(Scopes.SINGLETON);
+        binder.bind(GeodeClientConnections.class).in(Scopes.SINGLETON);
 
         configBinder(binder).bindConfig(GeodeConnectorConfig.class);
 

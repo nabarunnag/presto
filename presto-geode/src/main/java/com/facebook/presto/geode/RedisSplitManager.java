@@ -42,7 +42,7 @@ public class RedisSplitManager
 {
     private final String connectorId;
     private final GeodeConnectorConfig geodeConnectorConfig;
-    private final RedisJedisManager jedisManager;
+    private final GeodeClientConnections jedisManager;
 
     private static final long REDIS_MAX_SPLITS = 100;
     private static final long REDIS_STRIDE_SPLITS = 100;
@@ -51,7 +51,7 @@ public class RedisSplitManager
     public RedisSplitManager(
             GeodeConnectorId connectorId,
             GeodeConnectorConfig geodeConnectorConfig,
-            RedisJedisManager jedisManager)
+            GeodeClientConnections jedisManager)
     {
         this.connectorId = requireNonNull(connectorId, "connectorId is null").toString();
         this.geodeConnectorConfig = requireNonNull(geodeConnectorConfig, "redisConfig is null");
@@ -73,7 +73,7 @@ public class RedisSplitManager
         // when Redis keys are provides in a zset, create multiple
         // splits by splitting zset in chunks
         if (geodeTableHandle.getKeyDataFormat().equals("zset")) {
-            try (Jedis jedis = jedisManager.getJedisPool(nodes.get(0)).getResource()) {
+            try (Jedis jedis = jedisManager.getClientCache(nodes.get(0)).getResource()) {
                 numberOfKeys = jedis.zcount(geodeTableHandle.getKeyName(), "-inf", "+inf");
             }
         }

@@ -24,7 +24,7 @@ import static io.airlift.testing.Assertions.assertInstanceOf;
 import static org.testng.Assert.assertNotNull;
 
 @Test
-public class TestRedisPlugin
+public class TestGeodePlugin
 {
     @Test
     public void testStartup()
@@ -37,8 +37,8 @@ public class TestRedisPlugin
         Connector c = factory.create(
                 "test-connector",
                 ImmutableMap.<String, String>builder()
-                        .put("redis.table-names", "test")
-                        .put("redis.nodes", "localhost:6379")
+                        .put("geode.table-names", "test")
+                        .put("geode.nodes", "localhost:10334")
                         .build(),
                 new TestingConnectorContext());
         assertNotNull(c);

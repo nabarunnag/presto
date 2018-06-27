@@ -27,46 +27,47 @@ public class TestGeodeConnectorConfig
     {
         ConfigAssertions.assertRecordedDefaults(ConfigAssertions.recordDefaults(GeodeConnectorConfig.class)
                 .setNodes("")
-                .setDefaultSchema("default")
+                .setDefaultSchema("")
                 .setTableNames("")
-                .setTableDescriptionDir(new File("etc/redis/"))
-                .setRedisKeyDelimiter(":")
-                .setGeodeConnectTimeout("2000ms")
-                .setRedisDataBaseIndex(0)
-                .setGeodePassword(null)
-                .setRedisScanCount(100)
-                .setHideInternalColumns(true));
+                .setTableDescriptionDir(new File("etc/geode/")));
+//                .setKeyPrefixSchemaTable(false)
+//                .setRedisKeyDelimiter(":")
+//                .setGeodeConnectTimeout("2000ms")
+//                .setRedisDataBaseIndex(0)
+//                .setGeodePassword(null)
+//                .setRedisScanCount(100)
+//                .setHideInternalColumns(true));
     }
 
     @Test
     public void testExplicitPropertyMappings()
     {
         Map<String, String> properties = new ImmutableMap.Builder<String, String>()
-                .put("redis.table-description-dir", "/var/lib/redis")
-                .put("redis.table-names", "table1, table2, table3")
-                .put("redis.default-schema", "redis")
-                .put("redis.nodes", "localhost:12345,localhost:23456")
-                .put("redis.key-delimiter", ",")
-                .put("redis.key-prefix-schema-table", "true")
-                .put("redis.scan-count", "20")
-                .put("redis.hide-internal-columns", "false")
-                .put("redis.connect-timeout", "10s")
-                .put("redis.database-index", "5")
-                .put("redis.password", "secret")
+                .put("geode.table-description-dir", "/var/lib/geode")
+                .put("geode.table-names", "table1, table2, table3")
+                .put("geode.default-schema", "geode")
+                .put("geode.nodes", "localhost:12345,localhost:23456")
+//                .put("geode.key-delimiter", ",")
+//                .put("geode.key-prefix-schema-table", "true")
+//                .put("geode.scan-count", "20")
+//                .put("geode.hide-internal-columns", "false")
+//                .put("geode.connect-timeout", "10s")
+//                .put("geode.database-index", "5")
+//                .put("geode.password", "secret")
                 .build();
 
         GeodeConnectorConfig expected = new GeodeConnectorConfig()
-                .setTableDescriptionDir(new File("/var/lib/redis"))
+                .setTableDescriptionDir(new File("/var/lib/geode"))
                 .setTableNames("table1, table2, table3")
-                .setDefaultSchema("redis")
-                .setNodes("localhost:12345, localhost:23456")
-                .setHideInternalColumns(false)
-                .setRedisScanCount(20)
-                .setGeodeConnectTimeout("10s")
-                .setRedisDataBaseIndex(5)
-                .setGeodePassword("secret")
-                .setRedisKeyDelimiter(",")
-                .setKeyPrefixSchemaTable(true);
+                .setDefaultSchema("geode")
+                .setNodes("localhost:12345, localhost:23456");
+//                .setHideInternalColumns(false)
+//                .setRedisScanCount(20)
+//                .setGeodeConnectTimeout("10s")
+//                .setRedisDataBaseIndex(5)
+//                .setGeodePassword("secret")
+//                .setRedisKeyDelimiter(",")
+//                .setKeyPrefixSchemaTable(true);
 
         ConfigAssertions.assertFullMapping(properties, expected);
     }

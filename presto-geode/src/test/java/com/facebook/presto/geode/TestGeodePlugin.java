@@ -37,8 +37,8 @@ public class TestGeodePlugin
         Connector c = factory.create(
                 "test-connector",
                 ImmutableMap.<String, String>builder()
-                        .put("redis.table-names", "test")
-                        .put("redis.nodes", "localhost:6379")
+                        .put("geode.table-names", "test")
+                        .put("geode.nodes", "localhost:10334")
                         .build(),
                 new TestingConnectorContext());
         assertNotNull(c);

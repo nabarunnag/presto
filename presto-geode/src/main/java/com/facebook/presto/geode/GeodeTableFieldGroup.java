@@ -25,17 +25,17 @@ import static java.util.Objects.requireNonNull;
 /**
  * Groups the field descriptions for value or key.
  */
-public class RedisTableFieldGroup
+public class GeodeTableFieldGroup
 {
     private final String dataFormat;
-    private final List<RedisTableFieldDescription> fields;
+    private final List<GeodeTableFieldDescription> fields;
     private final String name;
 
     @JsonCreator
-    public RedisTableFieldGroup(
+    public GeodeTableFieldGroup(
             @JsonProperty("dataFormat") String dataFormat,
             @JsonProperty("name") String name,
-            @JsonProperty("fields") List<RedisTableFieldDescription> fields)
+            @JsonProperty("fields") List<GeodeTableFieldDescription> fields)
     {
         this.dataFormat = requireNonNull(dataFormat, "dataFormat is null");
         this.name = name;
@@ -60,7 +60,7 @@ public class RedisTableFieldGroup
     }
 
     @JsonProperty
-    public List<RedisTableFieldDescription> getFields()
+    public List<GeodeTableFieldDescription> getFields()
     {
         return fields;
     }

@@ -37,37 +37,37 @@ import static java.nio.file.Files.readAllBytes;
 import static java.util.Arrays.asList;
 import static java.util.Objects.requireNonNull;
 
-public class RedisTableDescriptionSupplier
-        implements Supplier<Map<SchemaTableName, RedisTableDescription>>
+public class GeodeTableDescriptionSupplier
+        implements Supplier<Map<SchemaTableName, GeodeTableDescription>>
 {
-    private static final Logger log = Logger.get(RedisTableDescriptionSupplier.class);
+    private static final Logger log = Logger.get(GeodeTableDescriptionSupplier.class);
 
     private final GeodeConnectorConfig geodeConnectorConfig;
-    private final JsonCodec<RedisTableDescription> tableDescriptionCodec;
+    private final JsonCodec<GeodeTableDescription> tableDescriptionCodec;
 
     @Inject
-    RedisTableDescriptionSupplier(GeodeConnectorConfig geodeConnectorConfig, JsonCodec<RedisTableDescription> tableDescriptionCodec)
+    GeodeTableDescriptionSupplier(GeodeConnectorConfig geodeConnectorConfig, JsonCodec<GeodeTableDescription> tableDescriptionCodec)
     {
         this.geodeConnectorConfig = requireNonNull(geodeConnectorConfig, "geodeConnectorConfig is null");
         this.tableDescriptionCodec = requireNonNull(tableDescriptionCodec, "tableDescriptionCodec is null");
     }
 
     @Override
-    public Map<SchemaTableName, RedisTableDescription> get()
+    public Map<SchemaTableName, GeodeTableDescription> get()
     {
-        ImmutableMap.Builder<SchemaTableName, RedisTableDescription> builder = ImmutableMap.builder();
+        ImmutableMap.Builder<SchemaTableName, GeodeTableDescription> builder = ImmutableMap.builder();
 
         try {
             for (File file : listFiles(geodeConnectorConfig.getTableDescriptionDir())) {
                 if (file.isFile() && file.getName().endsWith(".json")) {
-                    RedisTableDescription table = tableDescriptionCodec.fromJson(readAllBytes(file.toPath()));
+                    GeodeTableDescription table = tableDescriptionCodec.fromJson(readAllBytes(file.toPath()));
                     String schemaName = firstNonNull(table.getSchemaName(), geodeConnectorConfig.getDefaultSchema());
                     log.debug("Redis table %s.%s: %s", schemaName, table.getTableName(), table);
                     builder.put(new SchemaTableName(schemaName, table.getTableName()), table);
                 }
             }
 
-            Map<SchemaTableName, RedisTableDescription> tableDefinitions = builder.build();
+            Map<SchemaTableName, GeodeTableDescription> tableDefinitions = builder.build();
 
             log.debug("Loaded table definitions: %s", tableDefinitions.keySet());
 
@@ -82,17 +82,17 @@ public class RedisTableDescriptionSupplier
                 }
 
                 if (tableDefinitions.containsKey(tableName)) {
-                    RedisTableDescription redisTable = tableDefinitions.get(tableName);
+                    GeodeTableDescription redisTable = tableDefinitions.get(tableName);
                     log.debug("Found Table definition for %s: %s", tableName, redisTable);
                     builder.put(tableName, redisTable);
                 }
                 else {
                     // A dummy table definition only supports the internal columns.
                     log.debug("Created dummy Table definition for %s", tableName);
-                    builder.put(tableName, new RedisTableDescription(tableName.getTableName(),
+                    builder.put(tableName, new GeodeTableDescription(tableName.getTableName(),
                             tableName.getSchemaName(),
-                            new RedisTableFieldGroup(DummyRowDecoder.NAME, null, ImmutableList.of()),
-                            new RedisTableFieldGroup(DummyRowDecoder.NAME, null, ImmutableList.of())));
+                            new GeodeTableFieldGroup(DummyRowDecoder.NAME, null, ImmutableList.of()),
+                            new GeodeTableFieldGroup(DummyRowDecoder.NAME, null, ImmutableList.of())));
                 }
             }
 

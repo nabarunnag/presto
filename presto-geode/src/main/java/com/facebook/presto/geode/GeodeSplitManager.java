@@ -22,22 +22,20 @@ import com.facebook.presto.spi.HostAddress;
 import com.facebook.presto.spi.connector.ConnectorSplitManager;
 import com.facebook.presto.spi.connector.ConnectorTransactionHandle;
 import com.google.common.collect.ImmutableList;
-import redis.clients.jedis.Jedis;
 
 import javax.inject.Inject;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
-import static com.facebook.presto.geode.RedisHandleResolver.convertLayout;
+import static com.facebook.presto.geode.GeodeHandleResolver.convertLayout;
 import static com.google.common.base.Preconditions.checkState;
 import static java.util.Objects.requireNonNull;
 
 /**
  * Redis specific implementation of {@link ConnectorSplitManager}.
  */
-public class RedisSplitManager
+public class GeodeSplitManager
         implements ConnectorSplitManager
 {
     private final String connectorId;
@@ -48,7 +46,7 @@ public class RedisSplitManager
     private static final long REDIS_STRIDE_SPLITS = 100;
 
     @Inject
-    public RedisSplitManager(
+    public GeodeSplitManager(
             GeodeConnectorId connectorId,
             GeodeConnectorConfig geodeConnectorConfig,
             GeodeClientConnections jedisManager)
@@ -64,19 +62,12 @@ public class RedisSplitManager
         GeodeTableHandle geodeTableHandle = convertLayout(layout).getTable();
 
         List<HostAddress> nodes = new ArrayList<>(geodeConnectorConfig.getNodes());
-        Collections.shuffle(nodes);
+//        Collections.shuffle(nodes);
 
-        checkState(!nodes.isEmpty(), "No Redis nodes available");
         ImmutableList.Builder<ConnectorSplit> builder = ImmutableList.builder();
 
         long numberOfKeys = 1;
-        // when Redis keys are provides in a zset, create multiple
-        // splits by splitting zset in chunks
-        if (geodeTableHandle.getKeyDataFormat().equals("zset")) {
-            try (Jedis jedis = jedisManager.getClientCache(nodes.get(0)).getResource()) {
-                numberOfKeys = jedis.zcount(geodeTableHandle.getKeyName(), "-inf", "+inf");
-            }
-        }
+
 
         long stride = REDIS_STRIDE_SPLITS;
 
@@ -96,8 +87,6 @@ public class RedisSplitManager
                     geodeTableHandle.getKeyDataFormat(),
                     geodeTableHandle.getValueDataFormat(),
                     geodeTableHandle.getKeyName(),
-                    startIndex,
-                    endIndex,
                     nodes);
 
             builder.add(split);

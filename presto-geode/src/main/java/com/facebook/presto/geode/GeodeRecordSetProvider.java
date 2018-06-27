@@ -30,24 +30,24 @@ import javax.inject.Inject;
 
 import java.util.List;
 
-import static com.facebook.presto.geode.RedisHandleResolver.convertColumnHandle;
-import static com.facebook.presto.geode.RedisHandleResolver.convertSplit;
+import static com.facebook.presto.geode.GeodeHandleResolver.convertColumnHandle;
+import static com.facebook.presto.geode.GeodeHandleResolver.convertSplit;
 import static java.util.Objects.requireNonNull;
 
 /**
  * Factory for Redis specific {@link RecordSet} instances.
  */
-public class RedisRecordSetProvider
+public class GeodeRecordSetProvider
         implements ConnectorRecordSetProvider
 {
-    private final GeodeClientConnections jedisManager;
+    private final GeodeClientConnections geodeClientConnections;
     private final DecoderRegistry registry;
 
     @Inject
-    public RedisRecordSetProvider(DecoderRegistry registry, GeodeClientConnections jedisManager)
+    public GeodeRecordSetProvider(DecoderRegistry registry, GeodeClientConnections geodeClientConnections)
     {
         this.registry = requireNonNull(registry, "registry is null");
-        this.jedisManager = requireNonNull(jedisManager, "jedisManager is null");
+        this.geodeClientConnections = requireNonNull(geodeClientConnections, "geodeClientConnections is null");
     }
 
     @Override
@@ -90,6 +90,6 @@ public class RedisRecordSetProvider
         ImmutableMap<DecoderColumnHandle, FieldDecoder<?>> keyFieldDecoders = keyFieldDecoderBuilder.build();
         ImmutableMap<DecoderColumnHandle, FieldDecoder<?>> valueFieldDecoders = valueFieldDecoderBuilder.build();
 
-        return new GeodeRecordSet(geodeSplit, jedisManager, handles, keyDecoder, valueDecoder, keyFieldDecoders, valueFieldDecoders);
+        return new GeodeRecordSet(geodeSplit, geodeClientConnections, handles, keyDecoder, valueDecoder, keyFieldDecoders, valueFieldDecoders);
     }
 }

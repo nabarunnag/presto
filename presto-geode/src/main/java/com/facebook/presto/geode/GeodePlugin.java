@@ -26,15 +26,15 @@ import java.util.function.Supplier;
 import static java.util.Objects.requireNonNull;
 
 /**
- * Presto plugin to use Redis as a data source.
+ * Presto plugin to use Geode as a data source.
  */
-public class RedisPlugin
+public class GeodePlugin
         implements Plugin
 {
-    private Optional<Supplier<Map<SchemaTableName, RedisTableDescription>>> tableDescriptionSupplier = Optional.empty();
+    private Optional<Supplier<Map<SchemaTableName, GeodeTableDescription>>> tableDescriptionSupplier = Optional.empty();
 
     @VisibleForTesting
-    public synchronized void setTableDescriptionSupplier(Supplier<Map<SchemaTableName, RedisTableDescription>> tableDescriptionSupplier)
+    public synchronized void setTableDescriptionSupplier(Supplier<Map<SchemaTableName, GeodeTableDescription>> tableDescriptionSupplier)
     {
         this.tableDescriptionSupplier = Optional.of(requireNonNull(tableDescriptionSupplier, "tableDescriptionSupplier is null"));
     }
@@ -42,6 +42,6 @@ public class RedisPlugin
     @Override
     public Iterable<ConnectorFactory> getConnectorFactories()
     {
-        return ImmutableList.of(new RedisConnectorFactory(tableDescriptionSupplier));
+        return ImmutableList.of(new GeodeConnectorFactory(tableDescriptionSupplier));
     }
 }

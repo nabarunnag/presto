@@ -34,35 +34,35 @@ import static java.util.Objects.requireNonNull;
 /**
  * Guice module for the Redis connector.
  */
-public class RedisConnectorModule
+public class GeodeConnectorModule
         implements Module
 {
     @Override
     public void configure(Binder binder)
     {
-        binder.bind(RedisConnector.class).in(Scopes.SINGLETON);
+        binder.bind(GeodeConnector.class).in(Scopes.SINGLETON);
 
-        binder.bind(RedisMetadata.class).in(Scopes.SINGLETON);
-        binder.bind(RedisSplitManager.class).in(Scopes.SINGLETON);
-        binder.bind(RedisRecordSetProvider.class).in(Scopes.SINGLETON);
+        binder.bind(GeodeMetadata.class).in(Scopes.SINGLETON);
+        binder.bind(GeodeSplitManager.class).in(Scopes.SINGLETON);
+        binder.bind(GeodeRecordSetProvider.class).in(Scopes.SINGLETON);
 
         binder.bind(GeodeClientConnections.class).in(Scopes.SINGLETON);
 
         configBinder(binder).bindConfig(GeodeConnectorConfig.class);
 
         jsonBinder(binder).addDeserializerBinding(Type.class).to(TypeDeserializer.class);
-        jsonCodecBinder(binder).bindJsonCodec(RedisTableDescription.class);
+        jsonCodecBinder(binder).bindJsonCodec(GeodeTableDescription.class);
 
-        binder.install(new RedisDecoderModule());
+        binder.install(new GeodeDecoderModule());
 
-        for (RedisInternalFieldDescription internalFieldDescription : RedisInternalFieldDescription.getInternalFields()) {
+        for (GeodeInternalFieldDescription internalFieldDescription : GeodeInternalFieldDescription.getInternalFields()) {
             bindInternalColumn(binder, internalFieldDescription);
         }
     }
 
-    private static void bindInternalColumn(Binder binder, RedisInternalFieldDescription fieldDescription)
+    private static void bindInternalColumn(Binder binder, GeodeInternalFieldDescription fieldDescription)
     {
-        Multibinder<RedisInternalFieldDescription> fieldDescriptionBinder = Multibinder.newSetBinder(binder, RedisInternalFieldDescription.class);
+        Multibinder<GeodeInternalFieldDescription> fieldDescriptionBinder = Multibinder.newSetBinder(binder, GeodeInternalFieldDescription.class);
         fieldDescriptionBinder.addBinding().toInstance(fieldDescription);
     }
 

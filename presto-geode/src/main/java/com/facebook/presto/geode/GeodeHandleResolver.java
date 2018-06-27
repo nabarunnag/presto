@@ -26,7 +26,7 @@ import static java.util.Objects.requireNonNull;
 /**
  * Redis specific {@link ConnectorHandleResolver} implementation.
  */
-public class RedisHandleResolver
+public class GeodeHandleResolver
         implements ConnectorHandleResolver
 {
     @Override

@@ -16,17 +16,22 @@ package com.facebook.presto.geode;
 import com.facebook.presto.spi.HostAddress;
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableSet;
+import io.airlift.configuration.Config;
 
 import static com.google.common.collect.Iterables.transform;
+
+import java.io.File;
+import java.util.Set;
+
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 
 public class GeodeConnectorConfig
 {
     private static final int GEODE_DEFAULT_PORT = 10334;
 //
-//    /**
-//     * Seed nodes for Redis cluster. At least one must exist.
-//     */
-//    private Set<HostAddress> nodes = ImmutableSet.of();
+
+    private Set<HostAddress> nodes = ImmutableSet.of();
 //
 //    /**
 //     * Count parameter for Redis scan command.
@@ -53,20 +58,20 @@ public class GeodeConnectorConfig
 //     */
 //    private Duration geodeConnectTimeout = Duration.valueOf("2000ms");
 //
-//    /**
-//     * The schema name to use in the connector.
-//     */
-//    private String defaultSchema = "default";
+    /**
+     * The schema name to use in the connector.
+     */
+    private String defaultSchema = "";
 
     /**
      * Set of tables known to this connector. For each table, a description file may be present in the catalog folder which describes columns for the given table.
      */
-//    private Set<String> tableNames = ImmutableSet.of();
+    private Set<String> tableNames = ImmutableSet.of();
 
     /**
      * Folder holding the JSON description files for Redis values.
      */
-//    private File tableDescriptionDir = new File("etc/redis/");
+    private File tableDescriptionDir = new File("etc/geode/");
 
     /**
      * Whether internal columns are shown in table metadata or not. Default is no.
@@ -78,57 +83,57 @@ public class GeodeConnectorConfig
      */
 //    private boolean keyPrefixSchemaTable;
 
-//    @NotNull
-//    public File getTableDescriptionDir()
-//    {
-//        return tableDescriptionDir;
-//    }
+    @NotNull
+    public File getTableDescriptionDir()
+    {
+        return tableDescriptionDir;
+    }
 
-//    @Config("redis.table-description-dir")
-//    public GeodeConnectorConfig setTableDescriptionDir(File tableDescriptionDir)
-//    {
-//        this.tableDescriptionDir = tableDescriptionDir;
-//        return this;
-//    }
+    @Config("geode.table-description-dir")
+    public GeodeConnectorConfig setTableDescriptionDir(File tableDescriptionDir)
+    {
+        this.tableDescriptionDir = tableDescriptionDir;
+        return this;
+    }
 
-//    @NotNull
-//    public Set<String> getTableNames()
-//    {
-//        return tableNames;
-//    }
+    @NotNull
+    public Set<String> getTableNames()
+    {
+        return tableNames;
+    }
 
-//    @Config("redis.table-names")
-//    public GeodeConnectorConfig setTableNames(String tableNames)
-//    {
-//        this.tableNames = ImmutableSet.copyOf(Splitter.on(',').omitEmptyStrings().trimResults().split(tableNames));
-//        return this;
-//    }
+    @Config("geode.table-names")
+    public GeodeConnectorConfig setTableNames(String tableNames)
+    {
+        this.tableNames = ImmutableSet.copyOf(Splitter.on(',').omitEmptyStrings().trimResults().split(tableNames));
+        return this;
+    }
 
-//    @NotNull
-//    public String getDefaultSchema()
-//    {
-//        return defaultSchema;
-//    }
+    @NotNull
+    public String getDefaultSchema()
+    {
+        return defaultSchema;
+    }
 
-//    @Config("redis.default-schema")
-//    public GeodeConnectorConfig setDefaultSchema(String defaultSchema)
-//    {
-//        this.defaultSchema = defaultSchema;
-//        return this;
-//    }
-//
-//    @Size(min = 1)
-//    public Set<HostAddress> getNodes()
-//    {
-//        return nodes;
-//    }
+    @Config("geode.default-schema")
+    public GeodeConnectorConfig setDefaultSchema(String defaultSchema)
+    {
+        this.defaultSchema = defaultSchema;
+        return this;
+    }
 
-//    @Config("redis.nodes")
-//    public GeodeConnectorConfig setNodes(String nodes)
-//    {
-//        this.nodes = (nodes == null) ? null : parseNodes(nodes);
-//        return this;
-//    }
+    @Size(min = 1)
+    public Set<HostAddress> getNodes()
+    {
+        return nodes;
+    }
+
+    @Config("geode.nodes")
+    public GeodeConnectorConfig setNodes(String nodes)
+    {
+        this.nodes = (nodes == null) ? null : parseNodes(nodes);
+        return this;
+    }
 
 //    public int getRedisScanCount()
 //    {

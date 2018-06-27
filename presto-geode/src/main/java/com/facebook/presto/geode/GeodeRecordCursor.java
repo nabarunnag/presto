@@ -30,12 +30,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static com.facebook.presto.geode.RedisInternalFieldDescription.KEY_CORRUPT_FIELD;
-import static com.facebook.presto.geode.RedisInternalFieldDescription.KEY_FIELD;
-import static com.facebook.presto.geode.RedisInternalFieldDescription.KEY_LENGTH_FIELD;
-import static com.facebook.presto.geode.RedisInternalFieldDescription.VALUE_CORRUPT_FIELD;
-import static com.facebook.presto.geode.RedisInternalFieldDescription.VALUE_FIELD;
-import static com.facebook.presto.geode.RedisInternalFieldDescription.VALUE_LENGTH_FIELD;
+import static com.facebook.presto.geode.GeodeInternalFieldDescription.KEY_CORRUPT_FIELD;
+import static com.facebook.presto.geode.GeodeInternalFieldDescription.KEY_FIELD;
+import static com.facebook.presto.geode.GeodeInternalFieldDescription.KEY_LENGTH_FIELD;
+import static com.facebook.presto.geode.GeodeInternalFieldDescription.VALUE_CORRUPT_FIELD;
+import static com.facebook.presto.geode.GeodeInternalFieldDescription.VALUE_FIELD;
+import static com.facebook.presto.geode.GeodeInternalFieldDescription.VALUE_LENGTH_FIELD;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.lang.String.format;
 

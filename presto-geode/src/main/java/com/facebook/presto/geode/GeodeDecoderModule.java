@@ -25,9 +25,9 @@ import com.google.inject.Binder;
 import com.google.inject.Scopes;
 
 /**
- * Redis decoder specific module. Installs the registry and all known decoder submodules.
+ * Geode decoder specific module. Installs the registry and all known decoder submodules.
  */
-public class RedisDecoderModule
+public class GeodeDecoderModule
         extends DecoderModule
 {
     @Override
@@ -39,7 +39,5 @@ public class RedisDecoderModule
         binder.install(new CsvDecoderModule());
         binder.install(new JsonDecoderModule());
         binder.install(new RawDecoderModule());
-        binder.install(new HashRedisDecoderModule());
-        binder.install(new ZsetRedisDecoderModule());
     }
 }

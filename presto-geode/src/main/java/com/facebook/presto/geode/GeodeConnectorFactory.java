@@ -34,14 +34,15 @@ import static com.google.common.base.Throwables.throwIfUnchecked;
 import static java.util.Objects.requireNonNull;
 
 /**
- * Creates Redis Connectors based off connectorId and specific configuration.
+ * Creates Geode Connectors based off connectorId and specific configuration.
  */
-public class RedisConnectorFactory
+public class GeodeConnectorFactory
         implements ConnectorFactory
 {
-    private final Optional<Supplier<Map<SchemaTableName, RedisTableDescription>>> tableDescriptionSupplier;
+    private final Optional<Supplier<Map<SchemaTableName, GeodeTableDescription>>>
+        tableDescriptionSupplier;
 
-    RedisConnectorFactory(Optional<Supplier<Map<SchemaTableName, RedisTableDescription>>> tableDescriptionSupplier)
+    GeodeConnectorFactory(Optional<Supplier<Map<SchemaTableName, GeodeTableDescription>>> tableDescriptionSupplier)
     {
         this.tableDescriptionSupplier = requireNonNull(tableDescriptionSupplier, "tableDescriptionSupplier is null");
     }
@@ -49,13 +50,13 @@ public class RedisConnectorFactory
     @Override
     public String getName()
     {
-        return "redis";
+        return "Geode";
     }
 
     @Override
     public ConnectorHandleResolver getHandleResolver()
     {
-        return new RedisHandleResolver();
+        return new GeodeHandleResolver();
     }
 
     @Override
@@ -67,18 +68,18 @@ public class RedisConnectorFactory
         try {
             Bootstrap app = new Bootstrap(
                     new JsonModule(),
-                    new RedisConnectorModule(),
+                    new GeodeConnectorModule(),
                     binder -> {
                         binder.bind(GeodeConnectorId.class).toInstance(new GeodeConnectorId(connectorId));
                         binder.bind(TypeManager.class).toInstance(context.getTypeManager());
                         binder.bind(NodeManager.class).toInstance(context.getNodeManager());
 
                         if (tableDescriptionSupplier.isPresent()) {
-                            binder.bind(new TypeLiteral<Supplier<Map<SchemaTableName, RedisTableDescription>>>() {}).toInstance(tableDescriptionSupplier.get());
+                            binder.bind(new TypeLiteral<Supplier<Map<SchemaTableName, GeodeTableDescription>>>() {}).toInstance(tableDescriptionSupplier.get());
                         }
                         else {
-                            binder.bind(new TypeLiteral<Supplier<Map<SchemaTableName, RedisTableDescription>>>() {})
-                                    .to(RedisTableDescriptionSupplier.class)
+                            binder.bind(new TypeLiteral<Supplier<Map<SchemaTableName, GeodeTableDescription>>>() {})
+                                    .to(GeodeTableDescriptionSupplier.class)
                                     .in(Scopes.SINGLETON);
                         }
                     });
@@ -88,7 +89,7 @@ public class RedisConnectorFactory
                     .setRequiredConfigurationProperties(config)
                     .initialize();
 
-            return injector.getInstance(RedisConnector.class);
+            return injector.getInstance(GeodeConnector.class);
         }
         catch (Exception e) {
             throwIfUnchecked(e);

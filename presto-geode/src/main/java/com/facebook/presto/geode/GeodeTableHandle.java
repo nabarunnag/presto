@@ -26,7 +26,7 @@ import static java.util.Objects.requireNonNull;
 /**
  * Redis specific {@link ConnectorTableHandle}.
  */
-public final class RedisTableHandle
+public final class GeodeTableHandle
         implements ConnectorTableHandle
 {
     /**
@@ -36,7 +36,7 @@ public final class RedisTableHandle
 
     /**
      * The schema name for this table. Is set through configuration and read
-     * using {@link RedisConnectorConfig#getDefaultSchema()}. Usually 'default'.
+     * using {@link GeodeConnectorConfig#getDefaultSchema()}. Usually 'default'.
      */
     private final String schemaName;
 
@@ -51,7 +51,7 @@ public final class RedisTableHandle
     private final String valueDataFormat;
 
     @JsonCreator
-    public RedisTableHandle(
+    public GeodeTableHandle(
             @JsonProperty("connectorId") String connectorId,
             @JsonProperty("schemaName") String schemaName,
             @JsonProperty("tableName") String tableName,
@@ -124,7 +124,7 @@ public final class RedisTableHandle
             return false;
         }
 
-        RedisTableHandle other = (RedisTableHandle) obj;
+        GeodeTableHandle other = (GeodeTableHandle) obj;
         return Objects.equals(this.connectorId, other.connectorId)
                 && Objects.equals(this.schemaName, other.schemaName)
                 && Objects.equals(this.tableName, other.tableName)

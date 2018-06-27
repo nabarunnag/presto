@@ -49,7 +49,7 @@ public class RedisSplitManager
 
     @Inject
     public RedisSplitManager(
-            RedisConnectorId connectorId,
+            GeodeConnectorId connectorId,
             RedisConnectorConfig redisConnectorConfig,
             RedisJedisManager jedisManager)
     {
@@ -61,7 +61,7 @@ public class RedisSplitManager
     @Override
     public ConnectorSplitSource getSplits(ConnectorTransactionHandle transaction, ConnectorSession session, ConnectorTableLayoutHandle layout, SplitSchedulingStrategy splitSchedulingStrategy)
     {
-        RedisTableHandle redisTableHandle = convertLayout(layout).getTable();
+        GeodeTableHandle geodeTableHandle = convertLayout(layout).getTable();
 
         List<HostAddress> nodes = new ArrayList<>(redisConnectorConfig.getNodes());
         Collections.shuffle(nodes);
@@ -72,9 +72,9 @@ public class RedisSplitManager
         long numberOfKeys = 1;
         // when Redis keys are provides in a zset, create multiple
         // splits by splitting zset in chunks
-        if (redisTableHandle.getKeyDataFormat().equals("zset")) {
+        if (geodeTableHandle.getKeyDataFormat().equals("zset")) {
             try (Jedis jedis = jedisManager.getJedisPool(nodes.get(0)).getResource()) {
-                numberOfKeys = jedis.zcount(redisTableHandle.getKeyName(), "-inf", "+inf");
+                numberOfKeys = jedis.zcount(geodeTableHandle.getKeyName(), "-inf", "+inf");
             }
         }
 
@@ -91,11 +91,11 @@ public class RedisSplitManager
             }
 
             RedisSplit split = new RedisSplit(connectorId,
-                    redisTableHandle.getSchemaName(),
-                    redisTableHandle.getTableName(),
-                    redisTableHandle.getKeyDataFormat(),
-                    redisTableHandle.getValueDataFormat(),
-                    redisTableHandle.getKeyName(),
+                    geodeTableHandle.getSchemaName(),
+                    geodeTableHandle.getTableName(),
+                    geodeTableHandle.getKeyDataFormat(),
+                    geodeTableHandle.getValueDataFormat(),
+                    geodeTableHandle.getKeyName(),
                     startIndex,
                     endIndex,
                     nodes);

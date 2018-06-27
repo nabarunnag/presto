@@ -20,16 +20,16 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class RedisTableLayoutHandle
         implements ConnectorTableLayoutHandle
 {
-    private final RedisTableHandle table;
+    private final GeodeTableHandle table;
 
     @JsonCreator
-    public RedisTableLayoutHandle(@JsonProperty("table") RedisTableHandle table)
+    public RedisTableLayoutHandle(@JsonProperty("table") GeodeTableHandle table)
     {
         this.table = table;
     }
 
     @JsonProperty
-    public RedisTableHandle getTable()
+    public GeodeTableHandle getTable()
     {
         return table;
     }

@@ -66,7 +66,7 @@ public class RedisMetadata
 
     @Inject
     RedisMetadata(
-            RedisConnectorId connectorId,
+            GeodeConnectorId connectorId,
             RedisConnectorConfig redisConnectorConfig,
             Supplier<Map<SchemaTableName, RedisTableDescription>> redisTableDescriptionSupplier,
             Set<RedisInternalFieldDescription> internalFieldDescriptions)
@@ -93,7 +93,7 @@ public class RedisMetadata
     }
 
     @Override
-    public RedisTableHandle getTableHandle(ConnectorSession session, SchemaTableName schemaTableName)
+    public GeodeTableHandle getTableHandle(ConnectorSession session, SchemaTableName schemaTableName)
     {
         RedisTableDescription table = getDefinedTables().get(schemaTableName);
         if (table == null) {
@@ -107,7 +107,7 @@ public class RedisMetadata
             keyName = table.getKey().getName();
         }
 
-        return new RedisTableHandle(
+        return new GeodeTableHandle(
                 connectorId,
                 schemaTableName.getSchemaName(),
                 schemaTableName.getTableName(),
@@ -134,7 +134,7 @@ public class RedisMetadata
             Constraint<ColumnHandle> constraint,
             Optional<Set<ColumnHandle>> desiredColumns)
     {
-        RedisTableHandle tableHandle = convertTableHandle(table);
+        GeodeTableHandle tableHandle = convertTableHandle(table);
 
         ConnectorTableLayout layout = new ConnectorTableLayout(new RedisTableLayoutHandle(tableHandle));
 
@@ -168,11 +168,11 @@ public class RedisMetadata
     @Override
     public Map<String, ColumnHandle> getColumnHandles(ConnectorSession session, ConnectorTableHandle tableHandle)
     {
-        RedisTableHandle redisTableHandle = convertTableHandle(tableHandle);
+        GeodeTableHandle geodeTableHandle = convertTableHandle(tableHandle);
 
-        RedisTableDescription redisTableDescription = getDefinedTables().get(redisTableHandle.toSchemaTableName());
+        RedisTableDescription redisTableDescription = getDefinedTables().get(geodeTableHandle.toSchemaTableName());
         if (redisTableDescription == null) {
-            throw new TableNotFoundException(redisTableHandle.toSchemaTableName());
+            throw new TableNotFoundException(geodeTableHandle.toSchemaTableName());
         }
 
         ImmutableMap.Builder<String, ColumnHandle> columnHandles = ImmutableMap.builder();

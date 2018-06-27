@@ -38,7 +38,7 @@ public class RedisHandleResolver
     @Override
     public Class<? extends ConnectorTableHandle> getTableHandleClass()
     {
-        return RedisTableHandle.class;
+        return GeodeTableHandle.class;
     }
 
     @Override
@@ -59,11 +59,11 @@ public class RedisHandleResolver
         return RedisTableLayoutHandle.class;
     }
 
-    static RedisTableHandle convertTableHandle(ConnectorTableHandle tableHandle)
+    static GeodeTableHandle convertTableHandle(ConnectorTableHandle tableHandle)
     {
         requireNonNull(tableHandle, "tableHandle is null");
-        checkArgument(tableHandle instanceof RedisTableHandle, "tableHandle is not an instance of RedisTableHandle");
-        return (RedisTableHandle) tableHandle;
+        checkArgument(tableHandle instanceof GeodeTableHandle, "tableHandle is not an instance of GeodeTableHandle");
+        return (GeodeTableHandle) tableHandle;
     }
 
     static RedisColumnHandle convertColumnHandle(ColumnHandle columnHandle)

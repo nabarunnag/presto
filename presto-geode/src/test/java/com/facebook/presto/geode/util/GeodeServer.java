@@ -45,6 +45,7 @@ public class GeodeServer
         throws IOException, URISyntaxException {
         GeodeLocator.createLocator().run();
         serverLauncher.start();
+
     }
 
     @Override

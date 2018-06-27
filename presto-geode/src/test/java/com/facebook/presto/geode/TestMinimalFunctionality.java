@@ -35,7 +35,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static com.facebook.presto.geode.util.RedisTestUtils.createEmptyTableDescription;
-import static com.facebook.presto.geode.util.RedisTestUtils.installRedisPlugin;
+import static com.facebook.presto.geode.util.RedisTestUtils.installGeodePlugin;
 import static com.facebook.presto.testing.TestingSession.testSessionBuilder;
 import static com.facebook.presto.testing.assertions.Assert.assertEquals;
 import static com.facebook.presto.transaction.TransactionBuilder.transaction;
@@ -76,8 +76,8 @@ public class TestMinimalFunctionality
 
         this.queryRunner = new StandaloneQueryRunner(SESSION);
 
-        installRedisPlugin(geodeServer, queryRunner,
-                ImmutableMap.<SchemaTableName, RedisTableDescription>builder()
+        installGeodePlugin(geodeServer, queryRunner,
+                ImmutableMap.<SchemaTableName, GeodeTableDescription>builder()
                         .put(createEmptyTableDescription(new SchemaTableName("default", tableName)))
                         .build());
     }

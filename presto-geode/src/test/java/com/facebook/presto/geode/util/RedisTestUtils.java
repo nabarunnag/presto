@@ -13,6 +13,8 @@
  */
 package com.facebook.presto.geode.util;
 
+import com.facebook.presto.geode.GeodePlugin;
+import com.facebook.presto.geode.GeodeTableDescription;
 import com.facebook.presto.metadata.QualifiedObjectName;
 import com.facebook.presto.geode.RedisPlugin;
 import com.facebook.presto.geode.RedisTableDescription;
@@ -35,11 +37,11 @@ public final class RedisTestUtils
 {
     private RedisTestUtils() {}
 
-    public static void installRedisPlugin(GeodeServer geodeServer, QueryRunner queryRunner, Map<SchemaTableName, RedisTableDescription> tableDescriptions)
+    public static void installGeodePlugin(GeodeServer geodeServer, QueryRunner queryRunner, Map<SchemaTableName, GeodeTableDescription> tableDescriptions)
     {
-        RedisPlugin redisPlugin = new RedisPlugin();
-        redisPlugin.setTableDescriptionSupplier(() -> tableDescriptions);
-        queryRunner.installPlugin(redisPlugin);
+        GeodePlugin geodePlugin = new GeodePlugin();
+        geodePlugin.setTableDescriptionSupplier(() -> tableDescriptions);
+        queryRunner.installPlugin(geodePlugin);
 
         Map<String, String> redisConfig = ImmutableMap.of(
                 "redis.nodes", geodeServer.getConnectString() + ":" + geodeServer.getPort(),
@@ -57,18 +59,18 @@ public final class RedisTestUtils
         tpchLoader.execute(format("SELECT * from %s", tpchTableName));
     }
 
-    public static Map.Entry<SchemaTableName, RedisTableDescription> loadTpchTableDescription(
-            JsonCodec<RedisTableDescription> tableDescriptionJsonCodec,
+    public static Map.Entry<SchemaTableName, GeodeTableDescription> loadTpchTableDescription(
+            JsonCodec<GeodeTableDescription> tableDescriptionJsonCodec,
             SchemaTableName schemaTableName,
             String dataFormat)
             throws IOException
     {
-        RedisTableDescription tpchTemplate;
+        GeodeTableDescription tpchTemplate;
         try (InputStream data = RedisTestUtils.class.getResourceAsStream(format("/tpch/%s/%s.json", dataFormat, schemaTableName.getTableName()))) {
             tpchTemplate = tableDescriptionJsonCodec.fromJson(ByteStreams.toByteArray(data));
         }
 
-        RedisTableDescription tableDescription = new RedisTableDescription(
+        GeodeTableDescription tableDescription = new GeodeTableDescription(
                 schemaTableName.getTableName(),
                 schemaTableName.getSchemaName(),
                 tpchTemplate.getKey(),
@@ -77,9 +79,9 @@ public final class RedisTestUtils
         return new AbstractMap.SimpleImmutableEntry<>(schemaTableName, tableDescription);
     }
 
-    public static Map.Entry<SchemaTableName, RedisTableDescription> createEmptyTableDescription(SchemaTableName schemaTableName)
+    public static Map.Entry<SchemaTableName, GeodeTableDescription> createEmptyTableDescription(SchemaTableName schemaTableName)
     {
-        RedisTableDescription tableDescription = new RedisTableDescription(
+        GeodeTableDescription tableDescription = new GeodeTableDescription(
                 schemaTableName.getTableName(),
                 schemaTableName.getSchemaName(),
                 null,

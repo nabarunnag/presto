@@ -31,7 +31,7 @@ import io.airlift.tpch.TpchTable;
 
 import java.util.Map;
 
-import static com.facebook.presto.geode.util.RedisTestUtils.installRedisPlugin;
+import static com.facebook.presto.geode.util.RedisTestUtils.installGeodePlugin;
 import static com.facebook.presto.geode.util.RedisTestUtils.loadTpchTableDescription;
 import static com.facebook.presto.testing.TestingSession.testSessionBuilder;
 import static com.facebook.presto.tpch.TpchMetadata.TINY_SCHEMA_NAME;
@@ -69,7 +69,7 @@ public final class RedisQueryRunner
 
             Map<SchemaTableName, RedisTableDescription> tableDescriptions = createTpchTableDescriptions(queryRunner.getCoordinator().getMetadata(), tables, dataFormat);
 
-            installRedisPlugin(geodeServer, queryRunner, tableDescriptions);
+            installGeodePlugin(geodeServer, queryRunner, tableDescriptions);
 
             TestingPrestoClient prestoClient = queryRunner.getClient();
 

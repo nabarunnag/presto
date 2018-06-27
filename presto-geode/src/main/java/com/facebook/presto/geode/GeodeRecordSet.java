@@ -29,11 +29,11 @@ import static java.util.Objects.requireNonNull;
 /**
  * Redis specific record set. Returns a cursor for a table which iterates over a Redis values.
  */
-public class RedisRecordSet
+public class GeodeRecordSet
         implements RecordSet
 {
-    private final RedisSplit split;
-    private final GeodeClientConnections jedisManager;
+    private final GeodeSplit split;
+    private final GeodeClientConnections geodeClientConnections;
 
     private final RowDecoder keyDecoder;
     private final RowDecoder valueDecoder;
@@ -43,9 +43,9 @@ public class RedisRecordSet
     private final List<DecoderColumnHandle> columnHandles;
     private final List<Type> columnTypes;
 
-    RedisRecordSet(
-            RedisSplit split,
-            GeodeClientConnections jedisManager,
+    GeodeRecordSet(
+            GeodeSplit split,
+            GeodeClientConnections geodeClientConnections,
             List<DecoderColumnHandle> columnHandles,
             RowDecoder keyDecoder,
             RowDecoder valueDecoder,
@@ -54,7 +54,7 @@ public class RedisRecordSet
     {
         this.split = requireNonNull(split, "split is null");
 
-        this.jedisManager = requireNonNull(jedisManager, "jedisManager is null");
+        this.geodeClientConnections = requireNonNull(geodeClientConnections, "geodeClientConnections is null");
 
         this.keyDecoder = requireNonNull(keyDecoder, "keyDecoder is null");
         this.valueDecoder = requireNonNull(valueDecoder, "valueDecoder is null");
@@ -78,6 +78,7 @@ public class RedisRecordSet
     @Override
     public RecordCursor cursor()
     {
-        return new RedisRecordCursor(keyDecoder, valueDecoder, keyFieldDecoders, valueFieldDecoders, split, columnHandles, jedisManager);
+        return new GeodeRecordCursor(keyDecoder, valueDecoder, keyFieldDecoders, valueFieldDecoders, split, columnHandles,
+            geodeClientConnections);
     }
 }

@@ -22,10 +22,6 @@ import com.facebook.presto.spi.type.Type;
 import io.airlift.log.Logger;
 import io.airlift.slice.Slice;
 import io.airlift.slice.Slices;
-import redis.clients.jedis.Jedis;
-import redis.clients.jedis.JedisPool;
-import redis.clients.jedis.ScanParams;
-import redis.clients.jedis.ScanResult;
 
 import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
@@ -33,7 +29,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.facebook.presto.geode.RedisInternalFieldDescription.KEY_CORRUPT_FIELD;
 import static com.facebook.presto.geode.RedisInternalFieldDescription.KEY_FIELD;
@@ -43,12 +38,13 @@ import static com.facebook.presto.geode.RedisInternalFieldDescription.VALUE_FIEL
 import static com.facebook.presto.geode.RedisInternalFieldDescription.VALUE_LENGTH_FIELD;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.lang.String.format;
-import static redis.clients.jedis.ScanParams.SCAN_POINTER_START;
 
-public class RedisRecordCursor
+import org.apache.geode.cache.client.ClientCache;
+
+public class GeodeRecordCursor
         implements RecordCursor
 {
-    private static final Logger log = Logger.get(RedisRecordCursor.class);
+    private static final Logger log = Logger.get(GeodeRecordCursor.class);
     private static final byte[] EMPTY_BYTE_ARRAY = new byte[0];
 
     private final RowDecoder keyDecoder;
@@ -56,16 +52,11 @@ public class RedisRecordCursor
     private final Map<DecoderColumnHandle, FieldDecoder<?>> keyFieldDecoders;
     private final Map<DecoderColumnHandle, FieldDecoder<?>> valueFieldDecoders;
 
-    private final RedisSplit split;
+    private final GeodeSplit split;
     private final List<DecoderColumnHandle> columnHandles;
-    private final GeodeClientConnections geodeClientConnections;
-    private final JedisPool jedisPool;
-    private final ScanParams scanParms;
+    private final ClientCache clientCache;
 
-    private ScanResult<String> redisCursor;
     private Iterator<String> keysIterator;
-
-    private final AtomicBoolean reported = new AtomicBoolean();
 
     private FieldValueProvider[] fieldValueProviders;
 
@@ -75,12 +66,12 @@ public class RedisRecordCursor
     private long totalBytes;
     private long totalValues;
 
-    RedisRecordCursor(
+    GeodeRecordCursor(
             RowDecoder keyDecoder,
             RowDecoder valueDecoder,
             Map<DecoderColumnHandle, FieldDecoder<?>> keyFieldDecoders,
             Map<DecoderColumnHandle, FieldDecoder<?>> valueFieldDecoders,
-            RedisSplit split,
+            GeodeSplit split,
             List<DecoderColumnHandle> columnHandles,
             GeodeClientConnections geodeClientConnections)
     {
@@ -90,9 +81,7 @@ public class RedisRecordCursor
         this.valueFieldDecoders = valueFieldDecoders;
         this.split = split;
         this.columnHandles = columnHandles;
-        this.geodeClientConnections = geodeClientConnections;
-        this.jedisPool = geodeClientConnections.getClientCache(split.getNodes().get(0));
-        this.scanParms = setScanParms();
+        this.clientCache = geodeClientConnections.getClientCache();
 
         fetchKeys();
     }
@@ -116,36 +105,14 @@ public class RedisRecordCursor
         return columnHandles.get(field).getType();
     }
 
-    public boolean hasUnscannedData()
-    {
-        if (redisCursor == null) {
-            return false;
-        }
-        // no more keys are unscanned when
-        // when redis scan command
-        // returns 0 string cursor
-        return (!redisCursor.getStringCursor().equals("0"));
-    }
-
     @Override
     public boolean advanceNextPosition()
     {
         while (!keysIterator.hasNext()) {
-            if (!hasUnscannedData()) {
-                return endOfData();
-            }
             fetchKeys();
         }
 
         return nextRow(keysIterator.next());
-    }
-
-    private boolean endOfData()
-    {
-        if (!reported.getAndSet(true)) {
-            log.debug("Read a total of %d values with %d bytes.", totalValues, totalBytes);
-        }
-        return false;
     }
 
     private boolean nextRow(String keyString)
@@ -264,99 +231,18 @@ public class RedisRecordCursor
     {
     }
 
-    private ScanParams setScanParms()
-    {
-        if (split.getKeyDataType() == RedisDataType.STRING) {
-            ScanParams scanParms = new ScanParams();
-            scanParms.count(geodeClientConnections.getGeodeConnectorConfig().getRedisScanCount());
-
-            // when Redis key string follows "schema:table:*" format
-            // scan command can efficiently query tables
-            // by returning matching keys
-            // the alternative is to set key-prefix-schema-table to false
-            // and treat entire redis as single schema , single table
-            // redis Hash/Set types are to be supported - they can also be
-            // used to filter out table data
-
-            // "default" schema is not prefixed to the key
-
-            if (geodeClientConnections.getGeodeConnectorConfig().isKeyPrefixSchemaTable()) {
-                String keyMatch = "";
-                if (!split.getSchemaName().equals("default")) {
-                    keyMatch = split.getSchemaName() + Character.toString(
-                        geodeClientConnections.getGeodeConnectorConfig().getRedisKeyDelimiter());
-                }
-                keyMatch = keyMatch + split.getTableName() + Character.toString(
-                    geodeClientConnections.getGeodeConnectorConfig().getRedisKeyDelimiter()) + "*";
-                scanParms.match(keyMatch);
-            }
-            return scanParms;
-        }
-
-        return null;
-    }
 
     // Redis keys can be contained in the user-provided ZSET
     // Otherwise they need to be found by scanning Redis
-    private boolean fetchKeys()
+    private void fetchKeys()
     {
-        try (Jedis jedis = jedisPool.getResource()) {
-            switch (split.getKeyDataType()) {
-                case STRING: {
-                    String cursor = SCAN_POINTER_START;
-                    if (redisCursor != null) {
-                        cursor = redisCursor.getStringCursor();
-                    }
-
-                    log.debug("Scanning new Redis keys from cursor %s . %d values read so far", cursor, totalValues);
-
-                    redisCursor = jedis.scan(cursor, scanParms);
-                    List<String> keys = redisCursor.getResult();
-                    keysIterator = keys.iterator();
-                }
-                break;
-                case ZSET:
-                    Set<String> keys = jedis.zrange(split.getKeyName(), split.getStart(), split.getEnd());
-                    keysIterator = keys.iterator();
-                    break;
-                default:
-                    log.debug("Redis type of key %s is unsupported", split.getKeyDataFormat());
-                    return false;
-            }
-        }
-        return true;
+        keysIterator = clientCache.<String, Object>getRegion(split.getRegionName()).keySetOnServer().iterator();
     }
 
-    private boolean fetchData(String keyString)
+    private void fetchData(String keyString)
     {
         valueString = null;
-        valueMap = null;
-        // Redis connector supports two types of Redis
-        // values: STRING and HASH
-        // HASH types requires hash row decoder to
-        // fill in the columns
-        // whereas for the STRING type decoders are optional
-        try (Jedis jedis = jedisPool.getResource()) {
-            switch (split.getValueDataType()) {
-                case STRING:
-                    valueString = jedis.get(keyString);
-                    if (valueString == null) {
-                        log.warn("Redis data modified while query was running, string value at key %s deleted", keyString);
-                        return false;
-                    }
-                    break;
-                case HASH:
-                    valueMap = jedis.hgetAll(keyString);
-                    if (valueMap == null) {
-                        log.warn("Redis data modified while query was running, hash value at key %s deleted", keyString);
-                        return false;
-                    }
-                    break;
-                default:
-                    log.debug("Redis type for key %s is unsupported", keyString);
-                    return false;
-            }
-        }
-        return true;
+
+        valueString = clientCache.getRegion(split.getRegionName()).get(keyString).toString();
     }
 }

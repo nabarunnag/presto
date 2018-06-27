@@ -90,7 +90,7 @@ public class RedisSplitManager
                 endIndex = -1;
             }
 
-            RedisSplit split = new RedisSplit(connectorId,
+            GeodeSplit split = new GeodeSplit(connectorId,
                     geodeTableHandle.getSchemaName(),
                     geodeTableHandle.getTableName(),
                     geodeTableHandle.getKeyDataFormat(),

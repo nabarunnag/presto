@@ -25,9 +25,9 @@ import static com.google.common.base.MoreObjects.toStringHelper;
 import static java.util.Objects.requireNonNull;
 
 /**
- * Represents a Redis specific {@link ConnectorSplit}.
+ * Represents a Geode specific {@link ConnectorSplit}.
  */
-public final class RedisSplit
+public final class GeodeSplit
         implements ConnectorSplit
 {
     private final String connectorId;
@@ -37,24 +37,16 @@ public final class RedisSplit
     private final String keyName;
     private final String valueDataFormat;
 
-    private final RedisDataType valueDataType;
-    private final RedisDataType keyDataType;
-
     private final List<HostAddress> nodes;
 
-    private final long start;
-    private final long end;
-
     @JsonCreator
-    public RedisSplit(
+    public GeodeSplit(
             @JsonProperty("connectorId") String connectorId,
             @JsonProperty("schemaName") String schemaName,
             @JsonProperty("tableName") String tableName,
             @JsonProperty("keyDataFormat") String keyDataFormat,
             @JsonProperty("valueDataFormat") String valueDataFormat,
             @JsonProperty("keyName") String keyName,
-            @JsonProperty("start") long start,
-            @JsonProperty("end") long end,
             @JsonProperty("nodes") List<HostAddress> nodes)
     {
         this.connectorId = requireNonNull(connectorId, "connector id is null");
@@ -64,10 +56,6 @@ public final class RedisSplit
         this.valueDataFormat = requireNonNull(valueDataFormat, "valueDataFormat is null");
         this.keyName = keyName;
         this.nodes = ImmutableList.copyOf(requireNonNull(nodes, "addresses is null"));
-        this.start = start;
-        this.end = end;
-        this.valueDataType = toRedisDataType(valueDataFormat);
-        this.keyDataType = toRedisDataType(keyDataFormat);
     }
 
     @JsonProperty
@@ -87,6 +75,9 @@ public final class RedisSplit
     {
         return tableName;
     }
+
+    public String getRegionName() { return schemaName + tableName; }
+
 
     @JsonProperty
     public String getKeyDataFormat()
@@ -112,28 +103,6 @@ public final class RedisSplit
         return nodes;
     }
 
-    public RedisDataType getValueDataType()
-    {
-        return valueDataType;
-    }
-
-    public RedisDataType getKeyDataType()
-    {
-        return keyDataType;
-    }
-
-    @JsonProperty
-    public long getStart()
-    {
-        return start;
-    }
-
-    @JsonProperty
-    public long getEnd()
-    {
-        return end;
-    }
-
     @Override
     public boolean isRemotelyAccessible()
     {
@@ -152,18 +121,6 @@ public final class RedisSplit
         return this;
     }
 
-    private static RedisDataType toRedisDataType(String dataFormat)
-    {
-        switch (dataFormat) {
-            case "hash":
-                return RedisDataType.HASH;
-            case "zset":
-                return RedisDataType.ZSET;
-            default:
-                return RedisDataType.STRING;
-        }
-    }
-
     @Override
     public String toString()
     {
@@ -171,11 +128,7 @@ public final class RedisSplit
                 .add("connectorId", connectorId)
                 .add("schemaName", schemaName)
                 .add("tableName", tableName)
-                .add("keyDataFormat", keyDataFormat)
-                .add("valueDataFormat", valueDataFormat)
                 .add("keyName", keyName)
-                .add("start", start)
-                .add("end", end)
                 .add("nodes", nodes)
                 .toString();
     }

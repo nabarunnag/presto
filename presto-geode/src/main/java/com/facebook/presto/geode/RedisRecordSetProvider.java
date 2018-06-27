@@ -53,14 +53,14 @@ public class RedisRecordSetProvider
     @Override
     public RecordSet getRecordSet(ConnectorTransactionHandle transaction, ConnectorSession session, ConnectorSplit split, List<? extends ColumnHandle> columns)
     {
-        RedisSplit redisSplit = convertSplit(split);
+        GeodeSplit geodeSplit = convertSplit(split);
 
         ImmutableList.Builder<DecoderColumnHandle> handleBuilder = ImmutableList.builder();
         ImmutableMap.Builder<DecoderColumnHandle, FieldDecoder<?>> keyFieldDecoderBuilder = ImmutableMap.builder();
         ImmutableMap.Builder<DecoderColumnHandle, FieldDecoder<?>> valueFieldDecoderBuilder = ImmutableMap.builder();
 
-        RowDecoder keyDecoder = registry.getRowDecoder(redisSplit.getKeyDataFormat());
-        RowDecoder valueDecoder = registry.getRowDecoder(redisSplit.getValueDataFormat());
+        RowDecoder keyDecoder = registry.getRowDecoder(geodeSplit.getKeyDataFormat());
+        RowDecoder valueDecoder = registry.getRowDecoder(geodeSplit.getValueDataFormat());
 
         for (ColumnHandle handle : columns) {
             GeodeColumnHandle columnHandle = convertColumnHandle(handle);
@@ -69,7 +69,7 @@ public class RedisRecordSetProvider
             if (!columnHandle.isInternal()) {
                 if (columnHandle.isKeyDecoder()) {
                     FieldDecoder<?> fieldDecoder = registry.getFieldDecoder(
-                            redisSplit.getKeyDataFormat(),
+                            geodeSplit.getKeyDataFormat(),
                             columnHandle.getType().getJavaType(),
                             columnHandle.getDataFormat());
 
@@ -77,7 +77,7 @@ public class RedisRecordSetProvider
                 }
                 else {
                     FieldDecoder<?> fieldDecoder = registry.getFieldDecoder(
-                            redisSplit.getValueDataFormat(),
+                            geodeSplit.getValueDataFormat(),
                             columnHandle.getType().getJavaType(),
                             columnHandle.getDataFormat());
 
@@ -90,6 +90,6 @@ public class RedisRecordSetProvider
         ImmutableMap<DecoderColumnHandle, FieldDecoder<?>> keyFieldDecoders = keyFieldDecoderBuilder.build();
         ImmutableMap<DecoderColumnHandle, FieldDecoder<?>> valueFieldDecoders = valueFieldDecoderBuilder.build();
 
-        return new RedisRecordSet(redisSplit, jedisManager, handles, keyDecoder, valueDecoder, keyFieldDecoders, valueFieldDecoders);
+        return new GeodeRecordSet(geodeSplit, jedisManager, handles, keyDecoder, valueDecoder, keyFieldDecoders, valueFieldDecoders);
     }
 }

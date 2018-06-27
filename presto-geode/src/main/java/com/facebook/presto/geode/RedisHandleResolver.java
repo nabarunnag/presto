@@ -50,7 +50,7 @@ public class RedisHandleResolver
     @Override
     public Class<? extends ConnectorSplit> getSplitClass()
     {
-        return RedisSplit.class;
+        return GeodeSplit.class;
     }
 
     @Override
@@ -73,11 +73,11 @@ public class RedisHandleResolver
         return (GeodeColumnHandle) columnHandle;
     }
 
-    static RedisSplit convertSplit(ConnectorSplit split)
+    static GeodeSplit convertSplit(ConnectorSplit split)
     {
         requireNonNull(split, "split is null");
-        checkArgument(split instanceof RedisSplit, "split is not an instance of RedisSplit");
-        return (RedisSplit) split;
+        checkArgument(split instanceof GeodeSplit, "split is not an instance of GeodeSplit");
+        return (GeodeSplit) split;
     }
 
     static GeodeTableLayoutHandle convertLayout(ConnectorTableLayoutHandle layout)

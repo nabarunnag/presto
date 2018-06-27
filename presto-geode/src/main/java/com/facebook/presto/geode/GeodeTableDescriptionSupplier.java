@@ -82,9 +82,9 @@ public class GeodeTableDescriptionSupplier
                 }
 
                 if (tableDefinitions.containsKey(tableName)) {
-                    GeodeTableDescription redisTable = tableDefinitions.get(tableName);
-                    log.debug("Found Table definition for %s: %s", tableName, redisTable);
-                    builder.put(tableName, redisTable);
+                    GeodeTableDescription geodeTable = tableDefinitions.get(tableName);
+                    log.debug("Found Table definition for %s: %s", tableName, geodeTable);
+                    builder.put(tableName, geodeTable);
                 }
                 else {
                     // A dummy table definition only supports the internal columns.

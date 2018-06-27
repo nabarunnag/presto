@@ -17,11 +17,11 @@ import java.util.Objects;
 
 import static java.util.Objects.requireNonNull;
 
-public class RedisConnectorId
+public class GeodeConnectorId
 {
     private final String connectorId;
 
-    public RedisConnectorId(String connectorId)
+    public GeodeConnectorId(String connectorId)
     {
         this.connectorId = requireNonNull(connectorId, "connectorId is null");
     }
@@ -35,7 +35,7 @@ public class RedisConnectorId
         if (obj == null || getClass() != obj.getClass()) {
             return false;
         }
-        RedisConnectorId other = (RedisConnectorId) obj;
+        GeodeConnectorId other = (GeodeConnectorId) obj;
         return Objects.equals(this.connectorId, other.connectorId);
     }
 

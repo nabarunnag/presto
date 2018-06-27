@@ -63,7 +63,7 @@ public class RedisRecordSetProvider
         RowDecoder valueDecoder = registry.getRowDecoder(redisSplit.getValueDataFormat());
 
         for (ColumnHandle handle : columns) {
-            RedisColumnHandle columnHandle = convertColumnHandle(handle);
+            GeodeColumnHandle columnHandle = convertColumnHandle(handle);
             handleBuilder.add(columnHandle);
 
             if (!columnHandle.isInternal()) {

@@ -27,8 +27,8 @@ import static java.util.Objects.requireNonNull;
 /**
  * Redis specific connector column handle.
  */
-public final class RedisColumnHandle
-        implements DecoderColumnHandle, Comparable<RedisColumnHandle>
+public final class GeodeColumnHandle
+        implements DecoderColumnHandle, Comparable<GeodeColumnHandle>
 {
     private final String connectorId;
     private final int ordinalPosition;
@@ -74,7 +74,7 @@ public final class RedisColumnHandle
     private final boolean internal;
 
     @JsonCreator
-    public RedisColumnHandle(
+    public GeodeColumnHandle(
             @JsonProperty("connectorId") String connectorId,
             @JsonProperty("ordinalPosition") int ordinalPosition,
             @JsonProperty("name") String name,
@@ -185,7 +185,7 @@ public final class RedisColumnHandle
             return false;
         }
 
-        RedisColumnHandle other = (RedisColumnHandle) obj;
+        GeodeColumnHandle other = (GeodeColumnHandle) obj;
         return Objects.equals(this.connectorId, other.connectorId) &&
                 Objects.equals(this.ordinalPosition, other.ordinalPosition) &&
                 Objects.equals(this.name, other.name) &&
@@ -199,7 +199,7 @@ public final class RedisColumnHandle
     }
 
     @Override
-    public int compareTo(RedisColumnHandle otherHandle)
+    public int compareTo(GeodeColumnHandle otherHandle)
     {
         return Integer.compare(this.getOrdinalPosition(), otherHandle.getOrdinalPosition());
     }

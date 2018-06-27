@@ -102,9 +102,9 @@ public class RedisInternalFieldDescription
         return type;
     }
 
-    RedisColumnHandle getColumnHandle(String connectorId, int index, boolean hidden)
+    GeodeColumnHandle getColumnHandle(String connectorId, int index, boolean hidden)
     {
-        return new RedisColumnHandle(connectorId,
+        return new GeodeColumnHandle(connectorId,
                 index,
                 getName(),
                 getType(),

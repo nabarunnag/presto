@@ -15,7 +15,7 @@ package com.facebook.presto.geode;
 
 import com.facebook.presto.spi.connector.ConnectorTransactionHandle;
 
-public enum RedisTransactionHandle
+public enum GeodeTransactionHandle
         implements ConnectorTransactionHandle
 {
     INSTANCE

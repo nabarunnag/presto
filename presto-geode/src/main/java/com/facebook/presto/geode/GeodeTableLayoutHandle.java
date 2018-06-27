@@ -17,13 +17,13 @@ import com.facebook.presto.spi.ConnectorTableLayoutHandle;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class RedisTableLayoutHandle
+public class GeodeTableLayoutHandle
         implements ConnectorTableLayoutHandle
 {
     private final GeodeTableHandle table;
 
     @JsonCreator
-    public RedisTableLayoutHandle(@JsonProperty("table") GeodeTableHandle table)
+    public GeodeTableLayoutHandle(@JsonProperty("table") GeodeTableHandle table)
     {
         this.table = table;
     }

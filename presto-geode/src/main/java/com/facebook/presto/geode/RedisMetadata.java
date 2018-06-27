@@ -136,7 +136,7 @@ public class RedisMetadata
     {
         GeodeTableHandle tableHandle = convertTableHandle(table);
 
-        ConnectorTableLayout layout = new ConnectorTableLayout(new RedisTableLayoutHandle(tableHandle));
+        ConnectorTableLayout layout = new ConnectorTableLayout(new GeodeTableLayoutHandle(tableHandle));
 
         return ImmutableList.of(new ConnectorTableLayoutResult(layout, constraint.getSummary()));
     }
@@ -144,7 +144,7 @@ public class RedisMetadata
     @Override
     public ConnectorTableLayout getTableLayout(ConnectorSession session, ConnectorTableLayoutHandle handle)
     {
-        RedisTableLayoutHandle layout = convertLayout(handle);
+        GeodeTableLayoutHandle layout = convertLayout(handle);
 
         // tables in this connector have a single layout
         return getTableLayouts(session, layout.getTable(), Constraint.alwaysTrue(), Optional.empty())

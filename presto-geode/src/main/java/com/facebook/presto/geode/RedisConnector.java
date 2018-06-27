@@ -52,7 +52,7 @@ public class RedisConnector
     public ConnectorTransactionHandle beginTransaction(IsolationLevel isolationLevel, boolean readOnly)
     {
         checkConnectorSupports(READ_COMMITTED, isolationLevel);
-        return RedisTransactionHandle.INSTANCE;
+        return GeodeTransactionHandle.INSTANCE;
     }
 
     @Override

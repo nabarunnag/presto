@@ -32,7 +32,7 @@ public class RedisHandleResolver
     @Override
     public Class<? extends ConnectorTransactionHandle> getTransactionHandleClass()
     {
-        return RedisTransactionHandle.class;
+        return GeodeTransactionHandle.class;
     }
 
     @Override
@@ -44,7 +44,7 @@ public class RedisHandleResolver
     @Override
     public Class<? extends ColumnHandle> getColumnHandleClass()
     {
-        return RedisColumnHandle.class;
+        return GeodeColumnHandle.class;
     }
 
     @Override
@@ -56,7 +56,7 @@ public class RedisHandleResolver
     @Override
     public Class<? extends ConnectorTableLayoutHandle> getTableLayoutHandleClass()
     {
-        return RedisTableLayoutHandle.class;
+        return GeodeTableLayoutHandle.class;
     }
 
     static GeodeTableHandle convertTableHandle(ConnectorTableHandle tableHandle)
@@ -66,11 +66,11 @@ public class RedisHandleResolver
         return (GeodeTableHandle) tableHandle;
     }
 
-    static RedisColumnHandle convertColumnHandle(ColumnHandle columnHandle)
+    static GeodeColumnHandle convertColumnHandle(ColumnHandle columnHandle)
     {
         requireNonNull(columnHandle, "columnHandle is null");
-        checkArgument(columnHandle instanceof RedisColumnHandle, "columnHandle is not an instance of RedisColumnHandle");
-        return (RedisColumnHandle) columnHandle;
+        checkArgument(columnHandle instanceof GeodeColumnHandle, "columnHandle is not an instance of GeodeColumnHandle");
+        return (GeodeColumnHandle) columnHandle;
     }
 
     static RedisSplit convertSplit(ConnectorSplit split)
@@ -80,10 +80,10 @@ public class RedisHandleResolver
         return (RedisSplit) split;
     }
 
-    static RedisTableLayoutHandle convertLayout(ConnectorTableLayoutHandle layout)
+    static GeodeTableLayoutHandle convertLayout(ConnectorTableLayoutHandle layout)
     {
         requireNonNull(layout, "layout is null");
-        checkArgument(layout instanceof RedisTableLayoutHandle, "layout is not an instance of RedisTableLayoutHandle");
-        return (RedisTableLayoutHandle) layout;
+        checkArgument(layout instanceof GeodeTableLayoutHandle, "layout is not an instance of GeodeTableLayoutHandle");
+        return (GeodeTableLayoutHandle) layout;
     }
 }

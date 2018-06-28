@@ -75,11 +75,11 @@ public class GeodeSplitManager
             stride = numberOfKeys / REDIS_MAX_SPLITS;
         }
 
-        for (long startIndex = 0; startIndex < numberOfKeys; startIndex += stride) {
-            long endIndex = startIndex + stride - 1;
-            if (endIndex >= numberOfKeys) {
-                endIndex = -1;
-            }
+//        for (long startIndex = 0; startIndex < numberOfKeys; startIndex += stride) {
+//            long endIndex = startIndex + stride - 1;
+//            if (endIndex >= numberOfKeys) {
+//                endIndex = -1;
+//            }
 
             GeodeSplit split = new GeodeSplit(connectorId,
                     geodeTableHandle.getSchemaName(),
@@ -90,7 +90,7 @@ public class GeodeSplitManager
                     nodes);
 
             builder.add(split);
-        }
+//        }
         return new FixedSplitSource(builder.build());
     }
 }

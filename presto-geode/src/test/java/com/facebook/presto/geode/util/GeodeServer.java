@@ -22,7 +22,7 @@ import org.apache.geode.cache.client.ClientCacheFactory;
 import org.apache.geode.distributed.ServerLauncher;
 
 public class GeodeServer
-        implements Closeable
+        implements Closeable, Runnable
 {
     private final ServerLauncher serverLauncher;
 
@@ -44,10 +44,19 @@ public class GeodeServer
 
     }
 
+  public static void main(String[] args) throws IOException, URISyntaxException {
+    new GeodeServer().start();
+    System.out.println("Server Started");
+    while(true){
+
+    }
+  }
+
     public void start()
         throws IOException, URISyntaxException {
-        GeodeLocator.createLocator().run();
+//        GeodeLocator.createLocator().run();
         serverLauncher.start();
+
 
     }
 
@@ -68,4 +77,9 @@ public class GeodeServer
     {
         return serverLauncher.getHostNameForClients();
     }
+
+  @Override
+  public void run() {
+
+  }
 }

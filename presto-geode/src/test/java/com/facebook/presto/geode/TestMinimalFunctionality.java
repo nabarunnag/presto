@@ -44,6 +44,7 @@ import static org.testng.Assert.assertTrue;
 import org.apache.geode.cache.Region;
 import org.apache.geode.cache.client.ClientCache;
 import org.apache.geode.cache.client.ClientCacheFactory;
+import org.apache.geode.internal.cache.GemFireCacheImpl;
 
 @Test(singleThreaded = true)
 public class TestMinimalFunctionality
@@ -53,7 +54,6 @@ public class TestMinimalFunctionality
             .setSchema("default")
             .build();
 
-    private GeodeServer geodeServer;
     private String tableName;
     private StandaloneQueryRunner queryRunner;
     private ClientCache clientCache;
@@ -62,29 +62,30 @@ public class TestMinimalFunctionality
     public void startGeode()
             throws Exception
     {
-        geodeServer = GeodeServer.createGeodeServerLauncher();
-        geodeServer.start();
+//        geodeServer = GeodeServer.createGeodeServerLauncher();
+//        geodeServer.start();
         ClientCacheFactory
             clientCacheFactory = new ClientCacheFactory().set("cache-xml-file","/Users/nnag/Development/prestodb/presto/presto-geode/src/test/java/com/facebook/presto/geode/util/client-cache.xml");
-        clientCache = clientCacheFactory.create();
+//        clientCache = clientCacheFactory.create();
     }
 
     @AfterClass(alwaysRun = true)
     public void stopGeodeServer()
     {
-        geodeServer.close();
-        geodeServer = null;
+//        geodeServer.close();
+//        geodeServer = null;
     }
 
     @BeforeMethod
     public void spinUp()
             throws Exception
     {
-        this.tableName = "test_" + UUID.randomUUID().toString().replaceAll("-", "_");
+//        this.tableName = "test_" + UUID.randomUUID().toString().replaceAll("-", "_");
+        this.tableName = "region";
 
         this.queryRunner = new StandaloneQueryRunner(SESSION);
 
-        installGeodePlugin(geodeServer, queryRunner,
+        installGeodePlugin(queryRunner,
                 ImmutableMap.<SchemaTableName, GeodeTableDescription>builder()
                         .put(createEmptyTableDescription(new SchemaTableName("default", tableName)))
                         .build());
@@ -99,8 +100,9 @@ public class TestMinimalFunctionality
 
     private void populateData(int count)
     {
+        System.out.println("Doing puts");
         JsonEncoder jsonEncoder = new JsonEncoder();
-        Region region = clientCache.getRegion("region");
+        Region region = GemFireCacheImpl.getInstance().getRegion("default.region");
         for (long i = 0; i < count; i++) {
             Object value = ImmutableMap.of("id", Long.toString(i), "value", UUID.randomUUID().toString());
 
@@ -108,12 +110,14 @@ public class TestMinimalFunctionality
                 region.put(tableName + ":" + i, jsonEncoder.toString(value));
             }
         }
+        System.out.println("Done with puts");
     }
 
     @Test
     public void testTableExists()
     {
-        QualifiedObjectName name = new QualifiedObjectName("redis", "default", tableName);
+        QualifiedObjectName name = new QualifiedObjectName("geode", "default", tableName);
+        System.out.println("NABA name of the table " + name.toString());
         transaction(queryRunner.getTransactionManager(), new AllowAllAccessControl())
                 .singleStatement()
                 .execute(SESSION, session -> {
@@ -125,20 +129,20 @@ public class TestMinimalFunctionality
     @Test
     public void testTableHasData()
     {
+//        MaterializedResult result = queryRunner.execute("SELECT count(1) from " + tableName);
+
+//        MaterializedResult expected = MaterializedResult.resultBuilder(SESSION, BigintType.BIGINT)
+//                .row(0L)
+//                .build();
+//
+//        assertEquals(result, expected);
+
+        int count = 1000;
+//        populateData(count);
+
         MaterializedResult result = queryRunner.execute("SELECT count(1) from " + tableName);
 
         MaterializedResult expected = MaterializedResult.resultBuilder(SESSION, BigintType.BIGINT)
-                .row(0L)
-                .build();
-
-        assertEquals(result, expected);
-
-        int count = 1000;
-        populateData(count);
-
-        result = queryRunner.execute("SELECT count(1) from " + tableName);
-
-        expected = MaterializedResult.resultBuilder(SESSION, BigintType.BIGINT)
                 .row((long) count)
                 .build();
 

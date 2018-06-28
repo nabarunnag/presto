@@ -65,11 +65,11 @@ public final class RedisQueryRunner
             queryRunner.installPlugin(new TpchPlugin());
             queryRunner.createCatalog("tpch", "tpch");
 
-            geodeServer.start();
+//            geodeServer.start();
 
             Map<SchemaTableName, GeodeTableDescription> tableDescriptions = createTpchTableDescriptions(queryRunner.getCoordinator().getMetadata(), tables, dataFormat);
 
-            installGeodePlugin(geodeServer, queryRunner, tableDescriptions);
+            installGeodePlugin(queryRunner, tableDescriptions);
 
             TestingPrestoClient prestoClient = queryRunner.getClient();
 
@@ -79,7 +79,7 @@ public final class RedisQueryRunner
                 loadTpchTable(geodeServer, prestoClient, table, dataFormat);
             }
             log.info("Loading complete in %s", nanosSince(startTime).toString(SECONDS));
-            geodeServer.close();
+//            geodeServer.close();
             return queryRunner;
         }
         catch (Throwable e) {

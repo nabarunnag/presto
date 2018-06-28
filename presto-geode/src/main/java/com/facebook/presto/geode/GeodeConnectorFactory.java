@@ -50,7 +50,7 @@ public class GeodeConnectorFactory
     @Override
     public String getName()
     {
-        return "Geode";
+        return "geode";
     }
 
     @Override

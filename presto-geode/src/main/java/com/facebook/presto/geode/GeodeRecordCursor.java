@@ -24,6 +24,8 @@ import io.airlift.slice.Slice;
 import io.airlift.slice.Slices;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -236,7 +238,9 @@ public class GeodeRecordCursor
     // Otherwise they need to be found by scanning Redis
     private void fetchKeys()
     {
-        keysIterator = clientCache.<String, Object>getRegion(split.getRegionName()).keySetOnServer().iterator();
+        Collection keySet = clientCache.<String, Object>getRegion(split.getRegionName()).keySetOnServer();
+        System.out.println("NABA ::: region Name = " + split.getRegionName() + " Size of the keySet = " + keySet.size());
+        keysIterator = keySet.iterator();
     }
 
     private void fetchData(String keyString)

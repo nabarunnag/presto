@@ -32,6 +32,14 @@ public class GeodeLocator implements Runnable {
     locatorLauncher.stop();
   }
 
+  public static void main(String[] args) throws IOException, URISyntaxException {
+    new GeodeLocator().locatorLauncher.start();
+    System.out.println("Locator started!!!");
+    while(true){
+
+    }
+  }
+
 
   @Override
   public void run() {

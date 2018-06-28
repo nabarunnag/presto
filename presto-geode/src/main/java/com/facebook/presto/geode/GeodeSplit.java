@@ -76,7 +76,7 @@ public final class GeodeSplit
         return tableName;
     }
 
-    public String getRegionName() { return schemaName + tableName; }
+    public String getRegionName() { return schemaName +"."+ tableName; }
 
 
     @JsonProperty

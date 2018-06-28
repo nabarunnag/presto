@@ -38,9 +38,10 @@ public class GeodeClientConnections
     private static final Logger log = Logger.get(GeodeClientConnections.class);
 
 //    private final LoadingCache<HostAddress, ClientCache> jedisPoolCache;
-    private final ClientCache clientCache;
+    private static ClientCache clientCache;
 
     private final GeodeConnectorConfig geodeConnectorConfig;
+
 
     @Inject
     GeodeClientConnections(
@@ -48,17 +49,22 @@ public class GeodeClientConnections
             NodeManager nodeManager)
     {
         this.geodeConnectorConfig = requireNonNull(geodeConnectorConfig, "redisConfig is null");
-        this.clientCache = createClientCache();
+//        this.clientCache = createClientCache();
     }
 
-    private ClientCache createClientCache() {
-        ClientCacheFactory clientCacheFactory = new ClientCacheFactory().addPoolLocator(geodeConnectorConfig.getHost()
-            ,geodeConnectorConfig.getPort());
-        return clientCacheFactory.create();
+    synchronized private ClientCache createClientCache() {
+      if(clientCache ==null) {
+        ClientCacheFactory
+            clientCacheFactory =
+            new ClientCacheFactory().set("cache-xml-file","/Users/nnag/Development/prestodb/presto/presto-geode/src/test/java/com/facebook/presto/geode/util/client-cache.xml");;
+        clientCache = clientCacheFactory.create();
+      }
+      return clientCache;
     }
 
     public ClientCache getClientCache()
     {
+      createClientCache();
       return clientCache;
     }
 

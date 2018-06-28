@@ -6,7 +6,7 @@
     <pool name="client" subscription-enabled="true">
         <locator host="localhost" port="10334"/>
     </pool>
-    <region name="region">
+    <region name="default.region">
         <region-attributes refid="PROXY"/>
     </region>
 </client-cache>

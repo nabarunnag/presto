@@ -35,19 +35,20 @@ public final class RedisTestUtils
 {
     private RedisTestUtils() {}
 
-    public static void installGeodePlugin(GeodeServer geodeServer, QueryRunner queryRunner, Map<SchemaTableName, GeodeTableDescription> tableDescriptions)
+    public static void installGeodePlugin(QueryRunner queryRunner, Map<SchemaTableName, GeodeTableDescription> tableDescriptions)
     {
         GeodePlugin geodePlugin = new GeodePlugin();
         geodePlugin.setTableDescriptionSupplier(() -> tableDescriptions);
         queryRunner.installPlugin(geodePlugin);
 
         Map<String, String> redisConfig = ImmutableMap.of(
-                "redis.nodes", geodeServer.getConnectString() + ":" + geodeServer.getPort(),
-                "redis.table-names", Joiner.on(",").join(tableDescriptions.keySet()),
-                "redis.default-schema", "default",
-                "redis.hide-internal-columns", "true",
-                "redis.key-prefix-schema-table", "true");
-        queryRunner.createCatalog("redis", "redis", redisConfig);
+                "geode.nodes", "localhost"+ ":" + 40404,
+                "geode.table-names", Joiner.on(",").join(tableDescriptions.keySet())
+//                "geode.default-schema", "default",
+//                "geode.hide-internal-columns", "true",
+//                "geode.key-prefix-schema-table", "true"
+ );
+        queryRunner.createCatalog("geode", "geode", redisConfig);
     }
 
     public static void loadTpchTable(GeodeServer geodeServer, TestingPrestoClient prestoClient, String tableName, QualifiedObjectName tpchTableName, String dataFormat)
